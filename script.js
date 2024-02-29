@@ -73,7 +73,8 @@ function handleData(data) {
         setTimeout(() => {
             handleFileData(data);
         }, 0);
-    } else {
+    } else if(data.type === 'signal'){
+        //appendLog("4");
         // Handle other types of data
         // Add your logic here for handling different types of messages
     }
@@ -108,27 +109,36 @@ function sendFile() {
                 conn.send({ type: 'file', id: fileTransferId, data: chunk, name: file.name, offset: offset, totalSize: file.size });
 
                 offset += chunk.byteLength;
-
-                const progress = Math.floor((offset / file.size) * 100);
-
-                appendLog(`Sent ${progress}% of ${file.name}`);
-
-                if (offset < file.size) {
-                    sendChunk();
-                } else {
-                    appendLog(`File transfer completed: ${file.name}`);
-                }
             }
 
             setTimeout(() => {
                 sendChunk();
             }, 0);
+
+            conn.on('data', function (data) {
+                if (data.type === 'signal' && data.id === fileTransferId) {
+                    appendLog(`Sent ${data.progress}% of ${file.name}`);
+                }
+                if (offset < file.size) {
+                    setTimeout(() => {
+                        sendChunk();
+                    }, 0);
+                } else {
+                    appendLog(`File transfer completed: ${file.name}`);
+                }
+            });
+
+
         };
 
         reader.readAsArrayBuffer(file);
     } else {
         appendLog('Please select a file to send.');
     }
+}
+
+function updateSender(id,progress){
+    conn.send({ type: 'signal', id: id, progress: progress });
 }
 
 function handleFileData(data) {
@@ -150,8 +160,9 @@ function handleFileData(data) {
     const receivedSize = fileTransferInfo.totalSize;
 
     const progress = Math.floor((receivedSize / totalSize) * 100);
+    updateSender(fileTransferId,progress);
 
-    appendLog(`Received ${progress}% of ${offset}`);
+    appendLog(`Received ${progress}% of ${fileName}`);
 
     if (receivedSize === totalSize) {
         setTimeout(() => {
