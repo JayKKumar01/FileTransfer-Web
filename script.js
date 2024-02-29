@@ -11,6 +11,7 @@ const fileInput = document.getElementById('fileInput');
 
 let conn;
 const receivedFileData = new Map();
+let isFileBeingSent = false; 
 
 document.addEventListener('DOMContentLoaded', () => {
     appendLog(`My ID is: ${randomId}`);
@@ -93,6 +94,13 @@ function generateFileTransferId() {
 }
 
 function sendFile() {
+    if (isFileBeingSent) {
+        appendLog('File transfer is already in progress.');
+        return;
+    }
+
+    isFileBeingSent = true;
+
     if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const chunkSize = 1024 * 1024; // 1 MB chunks (adjust as needed)
@@ -124,6 +132,7 @@ function sendFile() {
                         sendChunk();
                     }, 0);
                 } else {
+                    isFileBeingSent = false;
                     appendLog(`File transfer completed: ${file.name}`);
                 }
             });
