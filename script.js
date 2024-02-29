@@ -11,7 +11,7 @@ const fileInput = document.getElementById('fileInput');
 
 let conn;
 const receivedFileData = new Map();
-let isFileBeingSent = false; 
+let isFileBeingTransfered = false; 
 
 document.addEventListener('DOMContentLoaded', () => {
     appendLog(`My ID is: ${randomId}`);
@@ -74,7 +74,8 @@ function handleData(data) {
         setTimeout(() => {
             handleFileData(data);
         }, 0);
-    } else if(data.type === 'signal'){
+    } else if(data.type === 'receiving'){
+        isFileBeingTransfered = true;
         //appendLog("4");
         // Handle other types of data
         // Add your logic here for handling different types of messages
@@ -93,18 +94,35 @@ function generateFileTransferId() {
     return Math.floor(100000 + Math.random() * 900000);
 }
 
+function showProgressContainer(fileName) {
+    const progressContainer = document.getElementById('progress-container');
+    const fileNameElement = document.getElementById('fileName');
+
+    fileNameElement.textContent = fileName;
+    progressContainer.style.display = 'block'; // Show progress container
+    transferContainer.style.display = 'none';
+}
+
+function hideProgressContainer() {
+    const progressContainer = document.getElementById('progress-container');
+    progressContainer.style.display = 'none'; // Hide progress container
+    transferContainer.style.display = 'block';
+}
+
 function sendFile() {
-    if (isFileBeingSent) {
+    if (isFileBeingTransfered) {
         appendLog('File transfer is already in progress.');
         return;
     }
 
-    isFileBeingSent = true;
+    isFileBeingTransfered = true;
 
     if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const chunkSize = 1024 * 1024; // 1 MB chunks (adjust as needed)
         const fileTransferId = generateFileTransferId();
+
+        showProgressContainer(file.name); 
 
         const reader = new FileReader();
 
@@ -126,15 +144,17 @@ function sendFile() {
             conn.on('data', function (data) {
                 if (data.type === 'signal' && data.id === fileTransferId) {
                     appendLog(`Sent ${data.progress}% of ${file.name}`);
+                    if (offset < file.size) {
+                        setTimeout(() => {
+                            sendChunk();
+                        }, 0);
+                    } else {
+                        isFileBeingTransfered = false;
+                        appendLog(`File transfer completed: ${file.name}`);
+                        hideProgressContainer();
+                    }
                 }
-                if (offset < file.size) {
-                    setTimeout(() => {
-                        sendChunk();
-                    }, 0);
-                } else {
-                    isFileBeingSent = false;
-                    appendLog(`File transfer completed: ${file.name}`);
-                }
+                
             });
 
 
@@ -151,10 +171,20 @@ function updateSender(id,progress){
 }
 
 function handleFileData(data) {
+    
+
     const fileName = data.name;
     const fileData = data.data;
     const offset = data.offset;
     const fileTransferId = data.id;
+
+    if(!isFileBeingTransfered){
+        isFileBeingTransfered = true;
+
+        showProgressContainer(fileName);
+
+    }
+    
 
     if (!receivedFileData.has(fileTransferId)) {
         receivedFileData.set(fileTransferId, { chunks: [], totalSize: 0 });
@@ -187,6 +217,8 @@ function handleFileData(data) {
             receivedFileData.delete(fileTransferId);
 
             appendLog(`Received file: ${fileName}`);
+            isFileBeingTransfered = false;
+            hideProgressContainer();
         }, 0);
     }
 }

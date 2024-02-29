@@ -21,6 +21,16 @@
             <input type="file" id="fileInput">
             <button id="sendButton" onclick="sendFile()">Send File</button>
         </div>
+        <div id="progress-container">
+            <!-- Current File name goes here -->
+            <div id="fileName"></div>
+            <!-- horizontal progress bar visually -->
+            <div class="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <!-- text-based progress update -->
+            <div id="progress-text">0%</div>
+        </div>
     </div>
 
     <div id="logs-container">
