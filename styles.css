@@ -1,0 +1,80 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #111; /* Dark background color */
+    color: #fff; /* Light text color */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    min-height: 100vh;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+}
+
+
+
+textarea#logs {
+    width: 200px;
+    height: 150px;
+    resize: none;
+    overflow-y: scroll;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin: 20px;
+    border: 1px solid #333; /* Dark border color */
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #222; /* Darker background color */
+    color: #fff; /* Light text color */
+}
+
+#room-container {
+    padding: 10px;
+    text-align: center; /* Center-align text within room-container */
+    border: 1px solid #555; /* Border color for room-container */
+    border-radius: 8px;
+}
+
+input#targetPeerId,
+#transfer-container input#fileInput {
+    width: calc(100% - 18px); /* Match the width with button and adjust for padding and border */
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    background-color: #333; /* Dark background color for input */
+    color: #fff; /* Light text color for input */
+    border: 1px solid #555; /* Border color for input */
+    border-radius: 4px;
+    padding: 8px;
+}
+
+button#connectButton,
+#transfer-container button#sendButton {
+    width: calc(100% - 18px); /* Match the width with input and adjust for padding and border */
+    box-sizing: border-box;
+    background-color: #4CAF50; /* Green background color for button */
+    color: #fff; /* Light text color for button */
+    border: 1px solid #2E8B57; /* Border color for button */
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+button#connectButton:hover,
+#transfer-container button#sendButton:hover {
+    background-color: #45a049; /* Darker green color on hover */
+}
+
+#room-container.connected {
+    display: none; /* Hide room container when connected */
+}
+
+#transfer-container {
+    display: none; /* Initially hide transfer container */
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #555;
+    border-radius: 8px;
+    background-color: #222;
+    color: #fff;
+    margin-top: 20px; /* Add margin for separation */
+}

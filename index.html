@@ -1,0 +1,32 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeerJS File Transfer - IOS and Android</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="peer.js"></script>
+</head>
+<body>
+    <div id="main-container">
+        <div id="room-container">
+            <!-- Message input and connect button -->
+            <input type="text" id="targetPeerId" placeholder="Enter target peer ID">
+            <button id="connectButton" onclick="connect()">Connect</button>
+        </div>
+        <div id="transfer-container">
+            <!-- File transfer content goes here -->
+            <!-- For example, you can add file input and send button -->
+            <input type="file" id="fileInput">
+            <button id="sendButton" onclick="sendFile()">Send File</button>
+        </div>
+    </div>
+
+    <div id="logs-container">
+        <textarea id="logs" readonly></textarea>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
