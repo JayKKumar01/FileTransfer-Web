@@ -18,6 +18,7 @@ const progressText = document.getElementById('progress-text');
 
 let conn;
 const receivedFileData = new Map();
+const sendFileData = new Map();
 let isFileBeingTransfered = false;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -146,11 +147,44 @@ function handleData(data) {
     } else if (data.type === 'ready') {
         showProgressContainer("Download", data.fileName);
         isFileBeingTransfered = true;
-        //appendLog("4");
-        // Handle other types of data
-        // Add your logic here for handling different types of messages
+    } else if(data.type === 'signal'){
+        handleSignal(data);
     }
 }
+
+
+function handleSignal(data){
+    const fileMap = receivedFileData.get(data.id);
+    updateProgressBar("Upload", data.progress);
+
+    if (fileMap.offset < fileMap.fileSize) {
+        setTimeout(() => {
+            sendChunk(fileMap);
+        }, 0);
+    } else {
+        isFileBeingTransfered = false;
+        appendLog(`File transfer completed: ${fileMap.fileName}`);
+
+        const index = fileMap.index;
+        sendFileData.delete(data.id);
+
+        if (index + 1 < fileInput.files.length) {
+            setTimeout(() => {
+                sendFiles(index + 1);
+            }, 1000);
+
+        } else {
+            hideProgressContainer();
+            var dataTransfer = new DataTransfer();
+
+            // Update the fileInput.files
+            fileInput.files = dataTransfer.files;
+            fileListContainer.style.display = 'none';
+        }
+
+    }
+}
+
 
 function downloadFile(fileName, fileData) {
     const blob = new Blob([fileData], { type: 'application/octet-stream' });
@@ -214,67 +248,38 @@ function sendFile() {
 
     if (fileInput.files.length > 0) {
         isFileBeingTransfered = true;
-        sendFile(0);
-
-        function sendFile(index) {
-            const file = fileInput.files[index];
-            const fileTransferId = generateFileTransferId();
-
-            showProgressContainer("Upload", file.name);
-
-            conn.send({ type: 'ready', fileName: file.name });
-
-            const reader = new FileReader();
-
-            reader.onload = function (event) {
-                const fileData = event.target.result;
-
-                const fileMap = {fileTransferId: fileTransferId, fileData: fileData, offset: 0, fileName: file.name, fileSize: file.size};
-
-                setTimeout(() => {
-                    sendChunk(fileMap);
-                }, 0);
-
-                conn.on('data', function (data) {
-                    if (data.type === 'signal' && data.id === fileTransferId) {
-                        updateProgressBar("Upload", data.progress);
-                        if (fileMap.offset < fileMap.fileSize) {
-                            setTimeout(() => {
-                                sendChunk(fileMap);
-                            }, 0);
-                        } else {
-                            isFileBeingTransfered = false;
-                            appendLog(`File transfer completed: ${file.name}`);
-
-                            if (index + 1 < fileInput.files.length) {
-                                setTimeout(() => {
-                                    sendFile(index + 1);
-                                }, 1000);
-
-                            } else {
-                                hideProgressContainer();
-                                var dataTransfer = new DataTransfer();
-
-                                // Update the fileInput.files
-                                fileInput.files = dataTransfer.files;
-                                fileListContainer.style.display = 'none';
-                            }
-
-                        }
-                    }
-
-                });
-
-
-            };
-
-            reader.readAsArrayBuffer(file);
-        }
-
+        sendFiles(0);
 
     } else {
         appendLog('Please select a file to send.');
     }
+}
+
+function sendFiles(index) {
+    const file = fileInput.files[index];
+    const fileTransferId = generateFileTransferId();
+
+    showProgressContainer("Upload", file.name);
+
+    conn.send({ type: 'ready', fileName: file.name });
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+        const fileData = event.target.result;
+
+        const fileMap = {index: index, fileTransferId: fileTransferId, fileData: fileData, offset: 0, fileName: file.name, fileSize: file.size};
+
+        receivedFileData.set(fileTransferId,fileMap);
+
+        setTimeout(() => {
+            sendChunk(fileMap);
+        }, 0);
+
+
+    };
+
+    reader.readAsArrayBuffer(file);
 }
 
 function updateSender(id, progress) {
