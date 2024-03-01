@@ -80,15 +80,17 @@ button#connectButton:hover,
 }
 
 #progress-container {
-    display: none; /* Initially hide transfer container */
+    width: 300px; /* Set a fixed width for the progress container */
+    display: none;
     padding: 10px;
     text-align: center;
     border: 1px solid #555;
     border-radius: 8px;
     background-color: #222;
     color: #fff;
-    margin-top: 20px; /* Add margin for separation */
+    margin-top: 20px;
 }
+
 
 #fileName {
     margin-bottom: 10px;

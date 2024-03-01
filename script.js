@@ -9,9 +9,14 @@ const transferContainer = document.getElementById('transfer-container');
 const roomContainer = document.getElementById('room-container');
 const fileInput = document.getElementById('fileInput');
 
+const progressContainer = document.getElementById('progress-container');
+const fileNameElement = document.getElementById('fileName');
+const progressBar = document.getElementById('progress-bar');
+const progressText = document.getElementById('progress-text');
+
 let conn;
 const receivedFileData = new Map();
-let isFileBeingTransfered = false; 
+let isFileBeingTransfered = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     appendLog(`My ID is: ${randomId}`);
@@ -74,7 +79,8 @@ function handleData(data) {
         setTimeout(() => {
             handleFileData(data);
         }, 0);
-    } else if(data.type === 'receiving'){
+    } else if (data.type === 'ready') {
+        showProgressContainer(data.fileName);
         isFileBeingTransfered = true;
         //appendLog("4");
         // Handle other types of data
@@ -95,12 +101,19 @@ function generateFileTransferId() {
 }
 
 function showProgressContainer(fileName) {
-    const progressContainer = document.getElementById('progress-container');
-    const fileNameElement = document.getElementById('fileName');
 
     fileNameElement.textContent = fileName;
     progressContainer.style.display = 'block'; // Show progress container
     transferContainer.style.display = 'none';
+
+    // Reset progress bar
+    progressBar.style.width = '0%';
+    progressText.textContent = '0%';
+}
+
+function updateProgressBar(progress) {
+    progressBar.style.width = `${progress}%`;
+    progressText.textContent = `${progress}%`;
 }
 
 function hideProgressContainer() {
@@ -122,7 +135,8 @@ function sendFile() {
         const chunkSize = 1024 * 1024; // 1 MB chunks (adjust as needed)
         const fileTransferId = generateFileTransferId();
 
-        showProgressContainer(file.name); 
+        showProgressContainer(file.name);
+        conn.send({type: 'ready', fileName: file.name});
 
         const reader = new FileReader();
 
@@ -144,6 +158,7 @@ function sendFile() {
             conn.on('data', function (data) {
                 if (data.type === 'signal' && data.id === fileTransferId) {
                     appendLog(`Sent ${data.progress}% of ${file.name}`);
+                    updateProgressBar(data.progress);
                     if (offset < file.size) {
                         setTimeout(() => {
                             sendChunk();
@@ -154,7 +169,7 @@ function sendFile() {
                         hideProgressContainer();
                     }
                 }
-                
+
             });
 
 
@@ -166,30 +181,30 @@ function sendFile() {
     }
 }
 
-function updateSender(id,progress){
+function updateSender(id, progress) {
     conn.send({ type: 'signal', id: id, progress: progress });
 }
 
 function handleFileData(data) {
-    
+
 
     const fileName = data.name;
     const fileData = data.data;
     const offset = data.offset;
     const fileTransferId = data.id;
 
-    if(!isFileBeingTransfered){
-        isFileBeingTransfered = true;
+    // if (!isFileBeingTransfered) {
+    //     isFileBeingTransfered = true;
 
-        showProgressContainer(fileName);
+    //     showProgressContainer(fileName);
 
-    }
-    
+    // }
+
 
     if (!receivedFileData.has(fileTransferId)) {
         receivedFileData.set(fileTransferId, { chunks: [], totalSize: 0 });
     }
-    
+
     const fileTransferInfo = receivedFileData.get(fileTransferId);
 
     fileTransferInfo.chunks[offset] = fileData;
@@ -199,9 +214,10 @@ function handleFileData(data) {
     const receivedSize = fileTransferInfo.totalSize;
 
     const progress = Math.floor((receivedSize / totalSize) * 100);
-    updateSender(fileTransferId,progress);
+    updateSender(fileTransferId, progress);
 
     appendLog(`Received ${progress}% of ${fileName}`);
+    updateProgressBar(progress);
 
     if (receivedSize === totalSize) {
         setTimeout(() => {
