@@ -1,6 +1,7 @@
 <!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,17 +9,24 @@
     <link rel="stylesheet" href="styles.css">
     <script src="peer.js"></script>
 </head>
+
 <body>
     <div id="main-container">
         <div id="room-container">
+
             <!-- Message input and connect button -->
             <input type="text" id="targetPeerId" placeholder="Enter target peer ID">
             <button id="connectButton" onclick="connect()">Connect</button>
         </div>
         <div id="transfer-container">
+            <!-- Add this to your HTML -->
+            <div id="fileListContainer">
+                <ul id="fileList"></ul>
+            </div>
+
             <!-- File transfer content goes here -->
             <!-- For example, you can add file input and send button -->
-            <input type="file" id="fileInput">
+            <input type="file" id="fileInput" multiple>
             <button id="sendButton" onclick="sendFile()">Send File</button>
         </div>
         <div id="progress-container">
@@ -39,4 +47,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

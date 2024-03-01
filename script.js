@@ -8,6 +8,7 @@ const targetPeerIdInput = document.getElementById('targetPeerId');
 const transferContainer = document.getElementById('transfer-container');
 const roomContainer = document.getElementById('room-container');
 const fileInput = document.getElementById('fileInput');
+const fileListContainer = document.getElementById('fileListContainer');
 
 const progressContainer = document.getElementById('progress-container');
 const fileNameElement = document.getElementById('fileName');
@@ -20,7 +21,31 @@ let isFileBeingTransfered = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     appendLog(`My ID is: ${randomId}`);
+    fileInput.addEventListener('change', handleFileSelection);
+    //showFileTransferWindow();
 });
+
+// Add this function to handle file selection changes
+function handleFileSelection() {
+    const selectedFiles = fileInput.files;
+    const fileList = document.getElementById('fileList');
+
+    fileList.innerHTML = ''; // Clear previous file list
+
+    if (selectedFiles.length > 1) {
+        fileListContainer.style.display = 'block';
+        for (let i = 0; i < selectedFiles.length; i++) {
+            const fileName = selectedFiles[i].name;
+            const listItem = document.createElement('li');
+            listItem.textContent = fileName;
+            fileList.appendChild(listItem);
+        }
+    } else {
+        fileListContainer.style.display = 'none';
+        fileList.innerHTML = '<li>No files selected</li>';
+    }
+}
+
 
 peer.on('open', () => {
     appendLog(`Connected!`);
@@ -34,7 +59,7 @@ function connect() {
     const targetPeerId = targetPeerIdInput.value.trim();
 
     if (targetPeerId !== '') {
-        conn = peer.connect(peerBranch + targetPeerId);
+        conn = peer.connect(peerBranch + targetPeerId,{ reliable: true });
         conn.on('open', () => {
             handleConnectionOpen(targetPeerId);
         });
