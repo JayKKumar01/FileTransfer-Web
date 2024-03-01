@@ -1,5 +1,3 @@
-Certainly! Below is a sample README file for your project. Feel free to customize it as needed:
-
 ```markdown
 # PeerJS File Transfer - Web, IOS, and Android
 
@@ -13,7 +11,6 @@ Welcome to the PeerJS File Transfer application! This web-based application allo
 - [Project Structure](#project-structure)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Overview
 
@@ -56,13 +53,6 @@ The project follows a simple structure:
 
 Contributions are welcome! If you have any ideas, improvements, or bug fixes, please open an issue or submit a pull request.
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
 ---
 
 **Note:** The application's stack flow and detailed code explanation are available in the [script.js](script.js) file comments. Feel free to explore the code for a deeper understanding of the implementation.
-```
-
-Replace the placeholder URLs and information with your actual project details. This README provides an overview of the project, instructions for getting started, and information on contributing and licensing. Adjust it to fit the specifics of your project.
