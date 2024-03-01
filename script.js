@@ -235,12 +235,19 @@ function sendFile() {
                         } else {
                             isFileBeingTransfered = false;
                             appendLog(`File transfer completed: ${file.name}`);
-                            hideProgressContainer();
+
                             if (index + 1 < fileInput.files.length) {
                                 setTimeout(() => {
                                     sendFile(index + 1);
                                 }, 1000);
 
+                            } else {
+                                hideProgressContainer();
+                                var dataTransfer = new DataTransfer();
+
+                                // Update the fileInput.files
+                                fileInput.files = dataTransfer.files;
+                                fileListContainer.style.display = 'none';
                             }
 
                         }
