@@ -1,50 +1,49 @@
-# File Transfer Web (Single File)
+# FileTransfer-Web-IOS-Android
 
-Welcome to the File Transfer Web (Single File) repository! This web application enables peer-to-peer file transfers using the PeerJS library. The application is hosted at [https://jaykkumar01.github.io/FileTransfer-Web-SingleFile/](https://jaykkumar01.github.io/FileTransfer-Web-SingleFile/).
+This web application enables users to share multiple files seamlessly across various platforms, including iOS, Android, and others. Hosted at [https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/), the application provides an intuitive interface for a hassle-free file-sharing experience.
 
 ## Features
 
-- Peer-to-peer file transfer using PeerJS.
-- Simple and intuitive user interface.
-- Real-time progress tracking during file transfer.
+- **Cross-Platform Compatibility:** Access the application from any device or operating system, ensuring a universal file-sharing solution.
+
+- **Multiple File Support:** Select and share multiple files simultaneously, enhancing efficiency and reducing the need for separate transfers.
+
+- **Real-Time Progress Tracking:** Stay informed about the progress of file transfers with a real-time progress bar, ensuring transparency and convenience.
+
+- **User-Friendly Interface:** The intuitive design ensures a seamless user experience, making it easy for users to navigate and perform file-sharing tasks.
+
+- **Peer-to-Peer Connection:** Utilizes a peer-to-peer connection for direct and secure file transfers between devices.
 
 ## Getting Started
 
-1. Access the application at [https://jaykkumar01.github.io/FileTransfer-Web-SingleFile/](https://jaykkumar01.github.io/FileTransfer-Web-SingleFile/).
-2. Enter a target peer ID to establish a connection.
-3. Select a file using the "Choose File" button.
-4. Click the "Send File" button to initiate the file transfer.
+1. Open the application in your preferred web browser by visiting [https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/).
 
-## Usage
+2. Connect with another user by entering their peer ID.
 
-- The application provides real-time logs, progress bars, and feedback during file transfer.
-- Ensure that both peers are connected before attempting file transfer.
-- You can view the logs at the bottom of the page in the provided textarea.
+3. Select the files you want to share.
 
-## Development
+4. Track the real-time progress of file transfers.
 
-If you want to contribute or explore the code, follow these steps:
+5. Enjoy hassle-free cross-platform file sharing.
 
-1. Clone the repository:
+## Compatibility
 
-   ```bash
-   git clone https://github.com/jaykkumar01/FileTransfer-Web-SingleFile.git
-   ```
+The application is designed to work seamlessly on various platforms, including:
 
-2. Open the `index.html` file in your browser or set up a local server.
+- **iOS:** Compatible with iOS devices, ensuring a smooth file-sharing experience for iPhone and iPad users.
 
-3. Explore the code in the `script.js` file for client-side logic and the `styles.css` file for styling.
+- **Android:** Provides robust support for Android devices, allowing seamless file transfers across a wide range of smartphones and tablets.
 
-## Dependencies
+- **Web Browsers:** Access the application from popular web browsers such as Chrome, Firefox, Safari, and more.
 
-- [PeerJS](https://peerjs.com/): A peer-to-peer data and media sharing library.
+## Known Issues
 
+- The application may require necessary permissions to access files on iOS and Android devices. Please ensure that permissions are granted for optimal functionality.
 
-## Acknowledgments
+## Support and Feedback
 
-- The application is built on the PeerJS library.
-- Special thanks to the open-source community for their contributions.
+For assistance or to report any issues, please contact our support team at [support@example.com](mailto:support@example.com). We welcome your feedback and suggestions for improving the application.
 
-Feel free to explore, contribute, and use this web application for your file transfer needs. If you encounter any issues or have suggestions for improvements, please open an issue or create a pull request.
+---
 
-Happy file transferring! 🚀
+**Note:** The information provided in this README is a template. Please customize it according to the specific details and features of your file-sharing application.
