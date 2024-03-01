@@ -22,7 +22,7 @@ let isFileBeingTransfered = false;
 document.addEventListener('DOMContentLoaded', () => {
     appendLog(`My ID is: ${randomId}`);
     fileInput.addEventListener('change', handleFileSelection);
-    showFileTransferWindow();
+    // showFileTransferWindow();
 
     var ListContainer = document.getElementById('fileList');
 
@@ -157,6 +157,7 @@ function downloadFile(fileName, fileData) {
     link.href = URL.createObjectURL(blob);
     link.download = fileName;
     link.click();
+    link.remove();
 }
 
 function generateFileTransferId() {
@@ -196,51 +197,64 @@ function sendFile() {
     isFileBeingTransfered = true;
 
     if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const chunkSize = 1024 * 256; // 1 MB chunks (adjust as needed)
-        const fileTransferId = generateFileTransferId();
+        sendFile(0);
 
-        showProgressContainer("Upload", file.name);
+        function sendFile(index) {
+            const file = fileInput.files[index];
+            const chunkSize = 1024 * 256; // 1 MB chunks (adjust as needed)
+            const fileTransferId = generateFileTransferId();
 
-        conn.send({ type: 'ready', fileName: file.name });
+            showProgressContainer("Upload", file.name);
 
-        const reader = new FileReader();
+            conn.send({ type: 'ready', fileName: file.name });
 
-        reader.onload = function (event) {
-            const fileData = event.target.result;
-            let offset = 0;
+            const reader = new FileReader();
 
-            function sendChunk() {
-                const chunk = fileData.slice(offset, offset + chunkSize);
-                conn.send({ type: 'file', id: fileTransferId, data: chunk, name: file.name, offset: offset, totalSize: file.size });
+            reader.onload = function (event) {
+                const fileData = event.target.result;
+                let offset = 0;
 
-                offset += chunk.byteLength;
-            }
+                function sendChunk() {
+                    const chunk = fileData.slice(offset, offset + chunkSize);
+                    conn.send({ type: 'file', id: fileTransferId, data: chunk, name: file.name, offset: offset, totalSize: file.size });
 
-            setTimeout(() => {
-                sendChunk();
-            }, 0);
-
-            conn.on('data', function (data) {
-                if (data.type === 'signal' && data.id === fileTransferId) {
-                    updateProgressBar("Upload", data.progress);
-                    if (offset < file.size) {
-                        setTimeout(() => {
-                            sendChunk();
-                        }, 0);
-                    } else {
-                        isFileBeingTransfered = false;
-                        appendLog(`File transfer completed: ${file.name}`);
-                        hideProgressContainer();
-                    }
+                    offset += chunk.byteLength;
                 }
 
-            });
+                setTimeout(() => {
+                    sendChunk();
+                }, 0);
+
+                conn.on('data', function (data) {
+                    if (data.type === 'signal' && data.id === fileTransferId) {
+                        updateProgressBar("Upload", data.progress);
+                        if (offset < file.size) {
+                            setTimeout(() => {
+                                sendChunk();
+                            }, 0);
+                        } else {
+                            isFileBeingTransfered = false;
+                            appendLog(`File transfer completed: ${file.name}`);
+                            hideProgressContainer();
+                            if (index + 1 < fileInput.files.length) {
+                                setTimeout(() => {
+                                    sendFile(index + 1);
+                                }, 1000);
+
+                            }
+
+                        }
+                    }
+
+                });
 
 
-        };
+            };
 
-        reader.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(file);
+        }
+
+
     } else {
         appendLog('Please select a file to send.');
     }
