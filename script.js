@@ -1,4 +1,5 @@
 const peerBranch = "JayKKumar01-";
+const chunkSize = 1024*256;
 const randomId = Math.floor(100000 + Math.random() * 900000);
 const peerId = `${peerBranch}${randomId}`;
 const peer = new Peer(peerId);
@@ -188,6 +189,21 @@ function hideProgressContainer() {
     transferContainer.style.display = 'block';
 }
 
+function sendChunk(fileMap){
+    let offset = fileMap.offset;
+    const chunk = fileMap.fileData.slice(offset,offset+chunkSize);
+    conn.send({
+         type: 'file',
+         id: fileMap.fileTransferId,
+         data: chunk,
+         name: fileMap.fileName,
+         offset: offset,
+         totalSize: fileMap.fileSize
+        });
+    fileMap.offset += chunk.byteLength;
+}
+
+
 function sendFile() {
     if (isFileBeingTransfered) {
         appendLog('File transfer is already in progress.');
@@ -202,7 +218,6 @@ function sendFile() {
 
         function sendFile(index) {
             const file = fileInput.files[index];
-            const chunkSize = 1024 * 256; // 1 MB chunks (adjust as needed)
             const fileTransferId = generateFileTransferId();
 
             showProgressContainer("Upload", file.name);
@@ -213,25 +228,19 @@ function sendFile() {
 
             reader.onload = function (event) {
                 const fileData = event.target.result;
-                let offset = 0;
 
-                function sendChunk() {
-                    const chunk = fileData.slice(offset, offset + chunkSize);
-                    conn.send({ type: 'file', id: fileTransferId, data: chunk, name: file.name, offset: offset, totalSize: file.size });
-
-                    offset += chunk.byteLength;
-                }
+                const fileMap = {fileTransferId: fileTransferId, fileData: fileData, offset: 0, fileName: file.name, fileSize: file.size};
 
                 setTimeout(() => {
-                    sendChunk();
+                    sendChunk(fileMap);
                 }, 0);
 
                 conn.on('data', function (data) {
                     if (data.type === 'signal' && data.id === fileTransferId) {
                         updateProgressBar("Upload", data.progress);
-                        if (offset < file.size) {
+                        if (fileMap.offset < fileMap.fileSize) {
                             setTimeout(() => {
-                                sendChunk();
+                                sendChunk(fileMap);
                             }, 0);
                         } else {
                             isFileBeingTransfered = false;
