@@ -22,7 +22,45 @@ let isFileBeingTransfered = false;
 document.addEventListener('DOMContentLoaded', () => {
     appendLog(`My ID is: ${randomId}`);
     fileInput.addEventListener('change', handleFileSelection);
-    //showFileTransferWindow();
+    showFileTransferWindow();
+
+    var ListContainer = document.getElementById('fileList');
+
+    // Attach a click event listener to the file list container
+    ListContainer.addEventListener('click', function (event) {
+
+        const item = event.target;
+
+
+        var fileListItems = document.querySelectorAll('#fileList li');
+
+        // // Attach a click event listener to each file list item
+        fileListItems.forEach(function (listItem) {
+            if (item == listItem) {
+                item.remove();
+                const fileName = item.textContent.trim();
+
+                // Remove the file from fileInput.files
+                var dataTransfer = new DataTransfer();
+
+                // Filter and add files to the DataTransfer object
+                Array.from(fileInput.files).forEach(file => {
+                    if (file.name !== fileName) {
+                        dataTransfer.items.add(file);
+                    }
+                });
+
+                // Update the fileInput.files
+                fileInput.files = dataTransfer.files;
+            }
+        });
+
+        if (fileListItems.length < 2) {
+            fileListContainer.style.display = 'none';
+        }
+
+
+    });
 });
 
 // Add this function to handle file selection changes
@@ -59,7 +97,7 @@ function connect() {
     const targetPeerId = targetPeerIdInput.value.trim();
 
     if (targetPeerId !== '') {
-        conn = peer.connect(peerBranch + targetPeerId,{ reliable: true });
+        conn = peer.connect(peerBranch + targetPeerId, { reliable: true });
         conn.on('open', () => {
             handleConnectionOpen(targetPeerId);
         });
@@ -163,7 +201,7 @@ function sendFile() {
         const fileTransferId = generateFileTransferId();
 
         showProgressContainer("Upload", file.name);
-        
+
         conn.send({ type: 'ready', fileName: file.name });
 
         const reader = new FileReader();
@@ -238,7 +276,7 @@ function handleFileData(data) {
     updateProgressBar("Download", progress);
     updateSender(fileTransferId, progress);
 
-    
+
 
 
     if (receivedSize === totalSize) {
@@ -258,7 +296,7 @@ function handleFileData(data) {
 
             receivedFileData.delete(fileTransferId);
 
-            
+
             hideProgressContainer();
             isFileBeingTransfered = false;
 
