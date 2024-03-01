@@ -1,5 +1,4 @@
-```
-PeerJS File Transfer - Web, IOS, and Android
+#PeerJS File Transfer - Web, IOS, and Android
 
 Overview:
 ---------
