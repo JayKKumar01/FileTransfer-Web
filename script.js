@@ -80,7 +80,7 @@ function handleData(data) {
             handleFileData(data);
         }, 0);
     } else if (data.type === 'ready') {
-        showProgressContainer(data.fileName);
+        showProgressContainer("Download",data.fileName);
         isFileBeingTransfered = true;
         //appendLog("4");
         // Handle other types of data
@@ -100,7 +100,7 @@ function generateFileTransferId() {
     return Math.floor(100000 + Math.random() * 900000);
 }
 
-function showProgressContainer(fileName) {
+function showProgressContainer(str,fileName) {
 
     fileNameElement.textContent = fileName;
     progressContainer.style.display = 'block'; // Show progress container
@@ -108,12 +108,12 @@ function showProgressContainer(fileName) {
 
     // Reset progress bar
     progressBar.style.width = '0%';
-    progressText.textContent = '0%';
+    progressText.textContent = `${str}: 0%`;
 }
 
-function updateProgressBar(progress) {
+function updateProgressBar(str,progress) {
     progressBar.style.width = `${progress}%`;
-    progressText.textContent = `${progress}%`;
+    progressText.textContent = `${str}: ${progress}%`;
 }
 
 function hideProgressContainer() {
@@ -132,10 +132,10 @@ function sendFile() {
 
     if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
-        const chunkSize = 1024 * 1024; // 1 MB chunks (adjust as needed)
+        const chunkSize = 1024 * 256; // 1 MB chunks (adjust as needed)
         const fileTransferId = generateFileTransferId();
 
-        showProgressContainer(file.name);
+        showProgressContainer("Upload",file.name);
         conn.send({type: 'ready', fileName: file.name});
 
         const reader = new FileReader();
@@ -158,7 +158,7 @@ function sendFile() {
             conn.on('data', function (data) {
                 if (data.type === 'signal' && data.id === fileTransferId) {
                     appendLog(`Sent ${data.progress}% of ${file.name}`);
-                    updateProgressBar(data.progress);
+                    updateProgressBar("Upload",data.progress);
                     if (offset < file.size) {
                         setTimeout(() => {
                             sendChunk();
@@ -193,13 +193,6 @@ function handleFileData(data) {
     const offset = data.offset;
     const fileTransferId = data.id;
 
-    // if (!isFileBeingTransfered) {
-    //     isFileBeingTransfered = true;
-
-    //     showProgressContainer(fileName);
-
-    // }
-
 
     if (!receivedFileData.has(fileTransferId)) {
         receivedFileData.set(fileTransferId, { chunks: [], totalSize: 0 });
@@ -214,12 +207,15 @@ function handleFileData(data) {
     const receivedSize = fileTransferInfo.totalSize;
 
     const progress = Math.floor((receivedSize / totalSize) * 100);
+    updateProgressBar("Download",progress);
     updateSender(fileTransferId, progress);
 
     appendLog(`Received ${progress}% of ${fileName}`);
-    updateProgressBar(progress);
+    
 
     if (receivedSize === totalSize) {
+        hideProgressContainer();
+        isFileBeingTransfered = false;
         setTimeout(() => {
             const completeFile = new Uint8Array(totalSize);
             const chunksArray = fileTransferInfo.chunks;
@@ -233,8 +229,8 @@ function handleFileData(data) {
             receivedFileData.delete(fileTransferId);
 
             appendLog(`Received file: ${fileName}`);
-            isFileBeingTransfered = false;
-            hideProgressContainer();
+            
+            
         }, 0);
     }
 }
