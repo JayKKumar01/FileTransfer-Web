@@ -1,3 +1,4 @@
+```
 PeerJS File Transfer - Web, IOS, and Android
 
 Overview:
@@ -34,6 +35,10 @@ Contributing:
 --------------
 Contributions are welcome! If you have any ideas, improvements, or bug fixes, please open an issue or submit a pull request.
 
+License:
+---------
+This project is licensed under the MIT License.
+
 ---
 
 Stack Flow:
@@ -52,4 +57,3 @@ Stack Flow:
 12. File Receiving Functions
 
 Note: The detailed explanation of the stack flow is available in the script.js file comments.
-```
