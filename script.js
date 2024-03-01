@@ -194,9 +194,10 @@ function sendFile() {
         return;
     }
 
-    isFileBeingTransfered = true;
+    
 
     if (fileInput.files.length > 0) {
+        isFileBeingTransfered = true;
         sendFile(0);
 
         function sendFile(index) {
