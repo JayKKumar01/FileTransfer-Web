@@ -320,7 +320,7 @@ function handleFileData(data) {
 
             hideProgressContainer();
             isFileBeingTransfered = false;
-
+            appendLog("Done!");
         }, 0);
     }
 }
