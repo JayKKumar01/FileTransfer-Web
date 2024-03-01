@@ -153,6 +153,7 @@ button#connectButton:hover,
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    cursor: pointer;
 }
 
 /* Add a cross symbol to each list item */
@@ -162,10 +163,10 @@ button#connectButton:hover,
     top: 50%;
     right: 8px;
     transform: translateY(-50%);
-    cursor: pointer;
+    
 }
 
-#fileList li:hover::after {
+#fileList li:hover {
     color: #ff0000; /* Change color on hover (optional) */
 }
 
