@@ -317,7 +317,6 @@ function handleFileData(data) {
 
             receivedFileData.delete(fileTransferId);
 
-
             hideProgressContainer();
             isFileBeingTransfered = false;
             appendLog("Done!");
