@@ -28,6 +28,16 @@ textarea#logs {
     color: #fff; /* Light text color */
 }
 
+/* WebKit-based browsers (Chrome, Safari) */
+textarea#logs::-webkit-scrollbar {
+    width: 2px; /* Set your desired scrollbar width */
+}
+
+/* Firefox */
+textarea#logs {
+    scrollbar-width: thin; /* Set your desired scrollbar width */
+}
+
 #room-container {
     padding: 10px;
     text-align: center; /* Center-align text within room-container */
