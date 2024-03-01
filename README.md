@@ -1,49 +1,68 @@
-# FileTransfer-Web-IOS-Android
+Certainly! Below is a sample README file for your project. Feel free to customize it as needed:
 
-This web application enables users to share multiple files seamlessly across various platforms, including iOS, Android, and others. Hosted at [https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/), the application provides an intuitive interface for a hassle-free file-sharing experience.
+```markdown
+# PeerJS File Transfer - Web, IOS, and Android
 
-## Features
+Welcome to the PeerJS File Transfer application! This web-based application allows users to transfer files seamlessly between devices using the PeerJS library.
 
-- **Cross-Platform Compatibility:** Access the application from any device or operating system, ensuring a universal file-sharing solution.
+## Table of Contents
 
-- **Multiple File Support:** Select and share multiple files simultaneously, enhancing efficiency and reducing the need for separate transfers.
+- [Overview](#overview)
+- [Live Demo](#live-demo)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
 
-- **Real-Time Progress Tracking:** Stay informed about the progress of file transfers with a real-time progress bar, ensuring transparency and convenience.
+## Overview
 
-- **User-Friendly Interface:** The intuitive design ensures a seamless user experience, making it easy for users to navigate and perform file-sharing tasks.
+This project is a PeerJS-based file transfer application. It provides a simple and intuitive interface for connecting with peers and transferring files between devices. The application supports multiple file selections, displays real-time transfer progress, and logs activities.
 
-- **Peer-to-Peer Connection:** Utilizes a peer-to-peer connection for direct and secure file transfers between devices.
+## Live Demo
+
+Check out the live demo [here](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/).
 
 ## Getting Started
 
-1. Open the application in your preferred web browser by visiting [https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/).
+To run the project locally, follow these steps:
 
-2. Connect with another user by entering their peer ID.
+1. Clone the repository:
 
-3. Select the files you want to share.
+   ```bash
+   git clone https://github.com/jaykkumar01/FileTransfer-Web-IOS-Android.git
+   ```
 
-4. Track the real-time progress of file transfers.
+2. Open the `index.html` file in your web browser.
 
-5. Enjoy hassle-free cross-platform file sharing.
+## Project Structure
 
-## Compatibility
+The project follows a simple structure:
 
-The application is designed to work seamlessly on various platforms, including:
+- **index.html:** The main HTML file containing the structure of the application.
+- **styles.css:** Stylesheet for styling the HTML elements.
+- **script.js:** The main JavaScript file with the application logic.
+- **peer.js:** The PeerJS library for establishing peer connections.
 
-- **iOS:** Compatible with iOS devices, ensuring a smooth file-sharing experience for iPhone and iPad users.
+## Usage
 
-- **Android:** Provides robust support for Android devices, allowing seamless file transfers across a wide range of smartphones and tablets.
+1. Open the application in your web browser.
+2. Enter the target peer ID and click the "Connect" button to establish a connection.
+3. Select files using the file input.
+4. Click the "Send File" button to initiate the file transfer.
+5. Monitor the progress in the progress bar and logs.
 
-- **Web Browsers:** Access the application from popular web browsers such as Chrome, Firefox, Safari, and more.
+## Contributing
 
-## Known Issues
+Contributions are welcome! If you have any ideas, improvements, or bug fixes, please open an issue or submit a pull request.
 
-- The application may require necessary permissions to access files on iOS and Android devices. Please ensure that permissions are granted for optimal functionality.
+## License
 
-## Support and Feedback
-
-For assistance or to report any issues, please contact our support team at [support@example.com](mailto:support@example.com). We welcome your feedback and suggestions for improving the application.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-**Note:** The information provided in this README is a template. Please customize it according to the specific details and features of your file-sharing application.
+**Note:** The application's stack flow and detailed code explanation are available in the [script.js](script.js) file comments. Feel free to explore the code for a deeper understanding of the implementation.
+```
+
+Replace the placeholder URLs and information with your actual project details. This README provides an overview of the project, instructions for getting started, and information on contributing and licensing. Adjust it to fit the specifics of your project.
