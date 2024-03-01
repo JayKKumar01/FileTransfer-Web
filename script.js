@@ -145,7 +145,7 @@ function handleData(data) {
             handleFileData(data);
         }, 0);
     } else if (data.type === 'ready') {
-        showProgressContainer("Download", data.fileName);
+        showProgressContainer("Download", data.fileName,data.indexInfo);
         isFileBeingTransfered = true;
     } else if(data.type === 'signal'){
         handleSignal(data);
@@ -199,9 +199,9 @@ function generateFileTransferId() {
     return Math.floor(100000 + Math.random() * 900000);
 }
 
-function showProgressContainer(str, fileName) {
+function showProgressContainer(str, fileName,index) {
 
-    fileNameElement.textContent = fileName;
+    fileNameElement.textContent = `${index}: ${fileName}`;
     progressContainer.style.display = 'block'; // Show progress container
     transferContainer.style.display = 'none';
 
@@ -209,7 +209,7 @@ function showProgressContainer(str, fileName) {
     progressBar.style.width = '0%';
     progressText.textContent = `${str}: 0%`;
 
-    appendLog(`File transfer started: ${fileName}`);
+    appendLog(`${index}: File transfer started: ${fileName}`);
 }
 
 function updateProgressBar(str, progress) {
@@ -258,10 +258,12 @@ function sendFile() {
 function sendFiles(index) {
     const file = fileInput.files[index];
     const fileTransferId = generateFileTransferId();
+    
+    let indexInfo = "("+(index+1)+"/"+fileInput.files.length+")";
 
-    showProgressContainer("Upload", file.name);
+    showProgressContainer("Upload", file.name,indexInfo);
 
-    conn.send({ type: 'ready', fileName: file.name });
+    conn.send({ type: 'ready', fileName: file.name, indexInfo: indexInfo });
 
     const reader = new FileReader();
 
