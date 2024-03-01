@@ -1,58 +1,53 @@
-#PeerJS File Transfer - Web, IOS, and Android
+```markdown
+# FileTransfer Web Application - iOS and Android
 
-Overview:
----------
-Welcome to the PeerJS File Transfer application! This web-based application allows users to transfer files seamlessly between devices using the PeerJS library.
+![GitHub Pages](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/)
 
-Live Demo:
-----------
-Check out the live demo at: https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/
+## Overview
 
-Getting Started:
-----------------
-To run the project locally, follow these steps:
-1. Clone the repository: `git clone https://github.com/jaykkumar01/FileTransfer-Web-IOS-Android.git`
-2. Open the `index.html` file in your web browser.
+This web application facilitates file transfer between peers using PeerJS. It is designed to work on both iOS and Android devices. The application allows users to connect with peers, select files for transfer, and monitor the progress of file uploads and downloads.
 
-Project Structure:
-------------------
-The project follows a simple structure:
-- index.html: The main HTML file containing the structure of the application.
-- styles.css: Stylesheet for styling the HTML elements.
-- script.js: The main JavaScript file with the application logic.
-- peer.js: The PeerJS library for establishing peer connections.
+## Live Demo
 
-Usage:
-------
-1. Open the application in your web browser.
-2. Enter the target peer ID and click the "Connect" button to establish a connection.
-3. Select files using the file input.
-4. Click the "Send File" button to initiate the file transfer.
-5. Monitor the progress in the progress bar and logs.
+Visit [FileTransfer Web App](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/) for a live demo of the application.
 
-Contributing:
---------------
-Contributions are welcome! If you have any ideas, improvements, or bug fixes, please open an issue or submit a pull request.
+## Features
 
-License:
----------
-This project is licensed under the MIT License.
+- Peer-to-peer file transfer using PeerJS.
+- Connect with peers by entering their peer ID.
+- Select and send multiple files.
+- Real-time progress updates during file transfers.
+- Cross-platform compatibility for iOS and Android.
 
----
+## Getting Started
 
-Stack Flow:
------------
-1. Initial Setup
-2. Main Container Setup
-3. Room Container
-4. Transfer Container
-5. Progress Container
-6. Logs Container
-7. Script Inclusions
-8. PeerJS Connection and Event Listeners
-9. Connection Handling Functions
-10. File Transfer Functions
-11. File Sending Functions
-12. File Receiving Functions
+1. Clone the repository:
 
-Note: The detailed explanation of the stack flow is available in the script.js file comments.
+   ```bash
+   git clone https://github.com/JayKKumar01/FileTransfer-Web-IOS-Android.git
+   ```
+
+2. Open `index.html` in your web browser.
+
+3. Enter your peer ID and the target peer ID to establish a connection.
+
+4. Select files for transfer and click the "Send File" button.
+
+5. Monitor file transfer progress in the progress container.
+
+## Stack Flow
+
+1. **Frontend:**
+   - HTML/CSS for the user interface.
+   - JavaScript for handling PeerJS, file transfer logic, and DOM manipulation.
+   - PeerJS for establishing peer connections.
+
+2. **Backend:**
+   - No server-side logic is required as PeerJS handles the peer-to-peer communication.
+
+3. **PeerJS:**
+   - PeerJS library is used for simplifying WebRTC peer-to-peer connections.
+
+## Contributing
+
+Contributions are welcome! If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request.
