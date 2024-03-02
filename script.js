@@ -39,7 +39,6 @@ var transferTime;
 
 // Wait for the DOM content to be fully loaded before executing script
 document.addEventListener('DOMContentLoaded', () => {
-    
     // Event listeners for file input and file list
     appendLog(`My ID is: ${randomId}`);
     fileInput.addEventListener('change', handleFileSelection);
@@ -359,4 +358,30 @@ function calculateTransferRate(fileSize, timeDiff) {
     // Calculate transfer rate in KB/s
     const transferRate = (fileSize / 1024) / (timeDiff / 1000);
     return transferRate.toFixed(2);
+}
+
+function getLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition);
+    } else { 
+      appendLog("Geolocation is not supported by this browser.");
+    }
+  }
+  
+  function showPosition(position) {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    const str = "Latitude: " + latitude +                                                                                                                                                       
+    "\nLongitude: " + longitude;
+    appendLog(str);
+    appendLog(generateLocationNumber(latitude,longitude));
+  }
+
+  function generateLocationNumber(latitude, longitude) {
+    const decimalPlaces = 6;
+
+    let a = latitude.toFixed(decimalPlaces).split('.');
+    let b = longitude.toFixed(decimalPlaces).split('.');
+
+    return `${a[0]} ${b[0]} ${a[1].replace(/^0+/, '')} ${b[1].replace(/^0+/, '')}`;
 }

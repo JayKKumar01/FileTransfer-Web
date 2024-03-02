@@ -228,3 +228,19 @@ button#connectButton:hover,
     padding: 8px;
     cursor: pointer;
 }
+
+.location-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+.location-button:hover {
+    background-color: #45a049;
+}
