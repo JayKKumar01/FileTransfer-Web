@@ -18,7 +18,20 @@
             <!-- Message input and connect button -->
             <input type="text" id="targetPeerId" placeholder="Enter target peer ID">
             <button id="connectButton" onclick="connect()">Connect</button>
+            <div id="tryNearbySearch" onclick="showControlContainer()">
+                <span id="search_icon"></span>
+                <div id="search_text">Try Nearby Search</div>
+            </div>
+
         </div>
+
+        <div id="control-container">
+            <button id="host-button">HOST</button>
+            <button id="find-button">FIND</button>
+            <div class="tryCode" onclick="showRoomContainer()">Try Code Search</div>
+
+        </div>
+
         <div id="transfer-container">
             <!-- Add this to your HTML -->
             <div id="fileListContainer">

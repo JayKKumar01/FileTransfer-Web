@@ -22,6 +22,7 @@ const logsTextarea = document.getElementById('logs');
 const targetPeerIdInput = document.getElementById('targetPeerId');
 const transferContainer = document.getElementById('transfer-container');
 const roomContainer = document.getElementById('room-container');
+const controlContainer = document.getElementById('control-container');
 const fileInput = document.getElementById('fileInput');
 const fileListContainer = document.getElementById('fileListContainer');
 const progressContainer = document.getElementById('progress-container');
@@ -75,6 +76,16 @@ function appendLog(log) {
 function showFileTransferWindow() {
     transferContainer.style.display = 'block';
     roomContainer.classList.add('connected');
+    controlContainer.classList.add('connected');
+}
+
+function showControlContainer() {
+    controlContainer.style.display = 'block';
+    roomContainer.style.display = 'none';
+}
+function showRoomContainer() {
+    controlContainer.style.display = 'none';
+    roomContainer.style.display = 'block';
 }
 
 function handleDisconnect() {
@@ -374,28 +385,6 @@ function getLocation() {
     }
 }
 
-function showPosition(position) {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-    // const str = "const lat1 = " + latitude +
-    //     "\nconst lon1 = " + longitude;
-    // appendLog(str);
-    // appendLog(generateLocationNumber(latitude, longitude));
-    // Calculate distance
-    const distance = haversineDistance(latitude, longitude);
-
-    lat1 = latitude;
-    lon1 = longitude;
-
-    if (!setLocation) {
-        setLocation = true;
-        appendLog(`Starting Location:\n${lat1}, ${lon1}`);
-        return;
-    }
-    appendLog(`Current Location:\n${lat1}, ${lon1}`);
-    appendLog(`Distance: ${distance} meters`);
-}
-
 function showError(error) {
     switch (error.code) {
         case error.PERMISSION_DENIED:
@@ -413,43 +402,19 @@ function showError(error) {
     }
 }
 
+function showPosition(position) {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    
+    appendLog(`ID: ${generateLocationNumber(latitude, longitude)}`);
+}
+
+
 function generateLocationNumber(latitude, longitude) {
-    const decimalPlaces = 6;
+    const decimalPlaces = 4;
 
     let a = latitude.toFixed(decimalPlaces).split('.');
     let b = longitude.toFixed(decimalPlaces).split('.');
 
-    return `${a[0]} ${b[0]} ${a[1].replace(/^0+/, '')} ${b[1].replace(/^0+/, '')}`;
-}
-
-// Fixed coordinates
-let lat1 = 28.49962
-let lon1 = 77.39375
-
-
-
-
-
-function haversineDistance(lat2, lon2) {
-
-
-    //Latitude: 28.4996246
-    // Longitude: 77.3937358
-
-    const R = 6371e3; // Earth's radius in meters
-    const φ1 = lat1 * (Math.PI / 180); // Latitude of point 1 in radians
-    const φ2 = lat2 * (Math.PI / 180); // Latitude of point 2 in radians
-    const Δφ = (lat2 - lat1) * (Math.PI / 180); // Difference in latitudes
-    const Δλ = (lon2 - lon1) * (Math.PI / 180); // Difference in longitudes
-
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-        Math.cos(φ1) * Math.cos(φ2) *
-        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); // Angular separation
-
-    let d = R * c; // Distance in meters
-
-    // Round to two decimal places
-    return Math.round(d * 100) / 100;
+    return `${a[0]}_${b[0]}_${b[1]}_${a[1]}`;
 }

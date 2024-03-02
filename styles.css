@@ -40,7 +40,7 @@ textarea#logs {
 
 /* Styling for the room container */
 #room-container {
-    padding: 10px;
+    padding: 20px 10px 10px 10px;
     text-align: center; /* Center-align text within room-container */
     border: 1px solid #555; /* Border color for room-container */
     border-radius: 8px;
@@ -243,4 +243,71 @@ button#connectButton:hover,
 
 .location-button:hover {
     background-color: #45a049;
+}
+
+
+
+#tryNearbySearch {
+    position: relative;
+    cursor: pointer;
+    color: #fff;
+    text-align: right;
+    margin: 10px;
+    font-size: 12px;
+}
+
+#search_icon::before {
+    content: "\1F50D";
+    color: #fff; /* Color for the icon */
+}
+
+#search_text {
+    display: inline-block;
+    text-decoration: underline;
+}
+
+#tryNearbySearch:hover,.tryCode:hover {
+    color: #45a049;
+}
+
+
+
+#control-container {
+    display: none;
+    background-color: #222; 
+    padding: 20px;
+    border: 1px solid #555; 
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
+#control-container button {
+    width: 100px;
+    box-sizing: border-box;
+    background-color: #4CAF50; 
+    color: #fff; 
+    border: 1px solid #2E8B57; 
+    border-radius: 4px;
+    padding: 8px; 
+    cursor: pointer;
+    margin: 5px;
+    font-size: 11px; 
+}
+
+#control-container button:hover {
+    background-color: #45a049; 
+}
+
+
+
+.tryCode{
+    position:relative;
+    display: block;
+    text-align: right;
+    font-size: 12px;
+    margin-top: 10px;
+    text-decoration: underline;
+    cursor: pointer;
 }
