@@ -41,6 +41,7 @@ var time;
 var transferTime;
 
 let setLocation = false;
+let findPeer = false;
 
 // Wait for the DOM content to be fully loaded before executing script
 document.addEventListener('DOMContentLoaded', () => {
@@ -50,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     var ListContainer = document.getElementById('fileList');
     ListContainer.addEventListener('click', handleFileListClick);
 });
+
 
 // Event handler when Peer instance is open (connection established)
 function handlePeer() {
@@ -81,9 +83,9 @@ function appendLog(log) {
 // Function to display the file transfer window
 function showFileTransferWindow() {
     transferContainer.style.display = 'block';
-    roomContainer.classList.add('connected');
-    controlContainer.classList.add('connected');
-    waitContainer.classList.add('connected');
+    roomContainer.style.display = 'none';
+    controlContainer.style.display = 'none';
+    waitContainer.style.display = 'none';
 }
 
 function showWaitingWindow() {
@@ -390,7 +392,8 @@ function calculateTransferRate(fileSize, timeDiff) {
     return transferRate.toFixed(2);
 }
 
-function getLocation() {
+function getLocation(findPeerVal) {
+    findPeer = findPeerVal;
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition, showError, {
             timeout: 60000,
@@ -424,9 +427,15 @@ function showPosition(position) {
     const longitude = position.coords.longitude;
 
     const id = generateLocationNumber(latitude, longitude);
-    appendLog(`ID: ${id}`);
-    host(id);
-    showWaitingWindow();
+    if (!findPeer) {
+        host(id);
+        showWaitingWindow();
+        appendLog(`Host ID: ${id}`);
+    }else{
+        find(id);
+        showWaitingWindow();
+    }
+
 }
 
 
@@ -443,4 +452,9 @@ function host(peerId) {
     peer.destroy();
     peer = new Peer(`${peerBranch}${peerId}`);
     handlePeer();
+}
+
+function find(peerId) {
+    targetPeerIdInput.value = peerId;
+    connect();
 }
