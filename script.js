@@ -37,6 +37,8 @@ let isFileBeingTransfered = false;
 var time;
 var transferTime;
 
+let setLocation = false;
+
 // Wait for the DOM content to be fully loaded before executing script
 document.addEventListener('DOMContentLoaded', () => {
     // Event listeners for file input and file list
@@ -302,7 +304,7 @@ function sendFiles(index) {
 }
 
 // Function to send progress update to the peer
-function updateSender(id, progress,transferRate) {
+function updateSender(id, progress, transferRate) {
     conn.send({ type: 'signal', id: id, progress: progress, transferRate: transferRate });
 }
 
@@ -325,11 +327,11 @@ function handleFileData(data) {
     const receivedSize = fileTransferInfo.totalSize;
 
     const progress = Math.floor((receivedSize / totalSize) * 100);
-    
-    const transferRate = Math.floor((fileData.byteLength / 1024)/((new Date() - transferTime) / 1000));
+
+    const transferRate = Math.floor((fileData.byteLength / 1024) / ((new Date() - transferTime) / 1000));
     transferTime = new Date();
-    updateProgressBar("Download", progress,transferRate);
-    updateSender(fileTransferId, progress,transferRate);
+    updateProgressBar("Download", progress, transferRate);
+    updateSender(fileTransferId, progress, transferRate);
 
     if (receivedSize === totalSize) {
         // File received completely, initiate download
@@ -362,26 +364,71 @@ function calculateTransferRate(fileSize, timeDiff) {
 
 function getLocation() {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(showPosition);
-    } else { 
-      appendLog("Geolocation is not supported by this browser.");
+        navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+        appendLog("Geolocation is not supported by this browser.");
     }
-  }
-  
-  function showPosition(position) {
+}
+
+function showPosition(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
-    const str = "Latitude: " + latitude +                                                                                                                                                       
-    "\nLongitude: " + longitude;
-    appendLog(str);
-    appendLog(generateLocationNumber(latitude,longitude));
-  }
+    // const str = "const lat1 = " + latitude +
+    //     "\nconst lon1 = " + longitude;
+    // appendLog(str);
+    // appendLog(generateLocationNumber(latitude, longitude));
+    // Calculate distance
+    const distance = haversineDistance(latitude, longitude);
 
-  function generateLocationNumber(latitude, longitude) {
+    lat1 = latitude;
+    lon1 = longitude;
+
+    if(!setLocation){
+        setLocation = true;
+        appendLog(`Starting Location:\n${lat1}, ${lon1}`);
+        return;
+    }
+    appendLog(`Current Location:\n${lat1}, ${lon1}`);
+    appendLog(`Distance: ${distance} meters`);
+}
+
+function generateLocationNumber(latitude, longitude) {
     const decimalPlaces = 6;
 
     let a = latitude.toFixed(decimalPlaces).split('.');
     let b = longitude.toFixed(decimalPlaces).split('.');
 
     return `${a[0]} ${b[0]} ${a[1].replace(/^0+/, '')} ${b[1].replace(/^0+/, '')}`;
+}
+
+// Fixed coordinates
+let lat1 = 28.49962
+let lon1 = 77.39375
+
+
+
+
+
+function haversineDistance(lat2, lon2) {
+    
+
+    //Latitude: 28.4996246
+    // Longitude: 77.3937358
+
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = lat1 * (Math.PI / 180); // Latitude of point 1 in radians
+    const φ2 = lat2 * (Math.PI / 180); // Latitude of point 2 in radians
+    const Δφ = (lat2 - lat1) * (Math.PI / 180); // Difference in latitudes
+    const Δλ = (lon2 - lon1) * (Math.PI / 180); // Difference in longitudes
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) *
+        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); // Angular separation
+
+    let d = R * c; // Distance in meters
+
+    // Round to two decimal places
+    return Math.round(d * 100) / 100;
 }
