@@ -15,7 +15,8 @@ const randomId = Math.floor(100000 + Math.random() * 900000);
 const peerId = `${peerBranch}${randomId}`;
 
 // Create a Peer instance with the generated peer ID
-const peer = new Peer(peerId);
+let peer = new Peer(peerId);
+handlePeer();
 
 // DOM elements
 const logsTextarea = document.getElementById('logs');
@@ -23,6 +24,7 @@ const targetPeerIdInput = document.getElementById('targetPeerId');
 const transferContainer = document.getElementById('transfer-container');
 const roomContainer = document.getElementById('room-container');
 const controlContainer = document.getElementById('control-container');
+const waitContainer = document.getElementById("wait-container");
 const fileInput = document.getElementById('fileInput');
 const fileListContainer = document.getElementById('fileListContainer');
 const progressContainer = document.getElementById('progress-container');
@@ -50,11 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Event handler when Peer instance is open (connection established)
-peer.on('open', () => appendLog('Connected!'));
+function handlePeer() {
+    peer.on('open', () => appendLog('Connected!'));
 
-// Event handler when a connection with a peer is established
-peer.on('connection', setupConnection);
-peer.on('disconnected', handleDisconnect);
+    // Event handler when a connection with a peer is established
+    peer.on('connection', setupConnection);
+    peer.on('disconnected', handleDisconnect);
+    //peer.on('close',handleClose);
+}
+
 
 // Function to establish a connection with the target peer
 function connect() {
@@ -77,6 +83,12 @@ function showFileTransferWindow() {
     transferContainer.style.display = 'block';
     roomContainer.classList.add('connected');
     controlContainer.classList.add('connected');
+    waitContainer.classList.add('connected');
+}
+
+function showWaitingWindow() {
+    waitContainer.style.display = 'block';
+    controlContainer.style.display = 'none';
 }
 
 function showControlContainer() {
@@ -90,6 +102,11 @@ function showRoomContainer() {
 
 function handleDisconnect() {
     appendLog('Disconnected from peer.');
+    // Add any additional actions you want to perform upon disconnection
+    // For example, you might want to reset the UI or display a message to the user.
+}
+function handleClose() {
+    appendLog('Peer closed.');
     // Add any additional actions you want to perform upon disconnection
     // For example, you might want to reset the UI or display a message to the user.
 }
@@ -405,8 +422,11 @@ function showError(error) {
 function showPosition(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
-    
-    appendLog(`ID: ${generateLocationNumber(latitude, longitude)}`);
+
+    const id = generateLocationNumber(latitude, longitude);
+    appendLog(`ID: ${id}`);
+    host(id);
+    showWaitingWindow();
 }
 
 
@@ -417,4 +437,10 @@ function generateLocationNumber(latitude, longitude) {
     let b = longitude.toFixed(decimalPlaces).split('.');
 
     return `${a[0]}_${b[0]}_${b[1]}_${a[1]}`;
+}
+
+function host(peerId) {
+    peer.destroy();
+    peer = new Peer(`${peerBranch}${peerId}`);
+    handlePeer();
 }

@@ -79,7 +79,7 @@ button#connectButton:hover,
 }
 
 /* Styling for connected room container (display:none when connected) */
-#room-container.connected {
+.connected {
     display: none;
 }
 
@@ -311,3 +311,19 @@ button#connectButton:hover,
     text-decoration: underline;
     cursor: pointer;
 }
+
+#wait-container {
+    display: none; /* Hide the container by default */
+    padding: 20px 10px; /* Adjust padding for visual appeal */
+    text-align: center; /* Center-align text within the container */
+    border: 1px solid #555; /* Border color for the container */
+    border-radius: 8px;
+    margin-top: 20px; /* Add margin for separation */
+    background-color: #333; /* Dark background color for the container */
+    color: #fff; /* Light text color for the container */
+}
+
+#wait-container span {
+    font-size: 14px; /* Set the font size */
+}
+
