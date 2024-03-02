@@ -1,49 +1,116 @@
-# FileTransfer-Web-IOS-Android
+# FileTransfer Web Application - iOS and Android
 
-This web application enables users to share multiple files seamlessly across various platforms, including iOS, Android, and others. Hosted at [https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/), the application provides an intuitive interface for a hassle-free file-sharing experience.
+[GitHub Pages](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/)
+
+## Overview
+
+This web application enables peer-to-peer file transfer using PeerJS and is designed to be compatible with both iOS and Android devices. Users can connect with peers, select files for transfer, and monitor the progress of uploads and downloads.
+
+## Live Demo
+
+Visit [FileTransfer Web App: (https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/)](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/) for a live demo.
 
 ## Features
 
-- **Cross-Platform Compatibility:** Access the application from any device or operating system, ensuring a universal file-sharing solution.
+- **Peer Connection:**
+  - Users can establish a connection by entering their peer ID and the target peer ID.
 
-- **Multiple File Support:** Select and share multiple files simultaneously, enhancing efficiency and reducing the need for separate transfers.
+- **File Selection:**
+  - Select and send multiple files to connected peers.
 
-- **Real-Time Progress Tracking:** Stay informed about the progress of file transfers with a real-time progress bar, ensuring transparency and convenience.
+- **Real-time Progress Updates:**
+  - Track file transfer progress using a progress bar and text updates.
 
-- **User-Friendly Interface:** The intuitive design ensures a seamless user experience, making it easy for users to navigate and perform file-sharing tasks.
+- **Cross-Platform Compatibility:**
+  - Works seamlessly on both iOS and Android devices.
 
-- **Peer-to-Peer Connection:** Utilizes a peer-to-peer connection for direct and secure file transfers between devices.
+## Functionality
+
+### `connect()`
+Establishes a connection with the target peer. Users enter the target peer ID, and the connection is set up using PeerJS.
+
+### `appendLog(log)`
+Logs messages to the textarea, providing feedback on various actions and events.
+
+### `showFileTransferWindow()`
+Displays the file transfer window upon successful connection.
+
+### `setupConnection(connection)`
+Handles the setup of a peer connection when established. Invoked when a connection event is detected.
+
+### `handleConnectionOpen(targetPeerId)`
+Handles actions when the connection is open, such as updating logs and showing the file transfer window.
+
+### `handleFileSelection()`
+Handles changes in the file input, updating the file list container and displaying selected files.
+
+### `handleFileListClick(event)`
+Handles click events on file list items, allowing users to remove selected files.
+
+### `handleData(data)`
+Handles data received from the peer, including file data, signaling data, and readiness signals.
+
+### `handleSignal(data)`
+Handles signaling data, updating the progress bar based on the signaling information.
+
+### `downloadFile(fileName, fileData)`
+Triggers the download of a received file, creating a downloadable link for the user.
+
+### `generateFileTransferId()`
+Generates a random ID for file transfer, ensuring uniqueness for each transfer.
+
+### `showProgressContainer(str, fileName, index)`
+Displays the progress container during file transfer, updating the filename and progress indicators.
+
+### `updateProgressBar(str, progress)`
+Updates the progress bar and text during file transfer, providing real-time progress updates.
+
+### `hideProgressContainer()`
+Hides the progress container after a file transfer is completed.
+
+### `sendChunk(fileMap)`
+Sends a chunk of a file to the peer during file transfer.
+
+### `sendFile()`
+Initiates the file transfer process, sending selected files to the connected peer.
+
+### `sendFiles(index)`
+Sends multiple files to the peer, handling each file's transfer sequentially.
+
+### `updateSender(id, progress)`
+Sends a progress update to the peer, allowing for synchronized progress tracking.
+
+### `handleFileData(data)`
+Handles incoming file data from the peer, aggregating chunks until the complete file is received.
 
 ## Getting Started
 
-1. Open the application in your preferred web browser by visiting [https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/).
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/JayKKumar01/FileTransfer-Web-IOS-Android.git
+   ```
 
-2. Connect with another user by entering their peer ID.
+2. **Open `index.html` in your web browser.**
 
-3. Select the files you want to share.
+3. **Enter your peer ID and the target peer ID to establish a connection.**
 
-4. Track the real-time progress of file transfers.
+4. **Select files for transfer and click the "Send File" button.**
 
-5. Enjoy hassle-free cross-platform file sharing.
+5. **Monitor file transfer progress in the progress container.**
 
-## Compatibility
+## Stack Flow
 
-The application is designed to work seamlessly on various platforms, including:
+1. **Frontend:**
+   - HTML/CSS for the user interface.
+   - JavaScript for handling PeerJS, file transfer logic, and DOM manipulation.
+   - PeerJS for establishing peer connections.
 
-- **iOS:** Compatible with iOS devices, ensuring a smooth file-sharing experience for iPhone and iPad users.
+2. **Backend:**
+   - No server-side logic is required as PeerJS handles the peer-to-peer communication.
 
-- **Android:** Provides robust support for Android devices, allowing seamless file transfers across a wide range of smartphones and tablets.
+3. **PeerJS:**
+   - PeerJS library is used for simplifying WebRTC peer-to-peer connections.
 
-- **Web Browsers:** Access the application from popular web browsers such as Chrome, Firefox, Safari, and more.
+## Contributing
 
-## Known Issues
-
-- The application may require necessary permissions to access files on iOS and Android devices. Please ensure that permissions are granted for optimal functionality.
-
-## Support and Feedback
-
-For assistance or to report any issues, please contact our support team at [support@example.com](mailto:support@example.com). We welcome your feedback and suggestions for improving the application.
-
----
-
-**Note:** The information provided in this README is a template. Please customize it according to the specific details and features of your file-sharing application.
+Contributions are welcome! If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request.
