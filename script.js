@@ -1,9 +1,17 @@
+// Prefix for generating unique peer IDs
 const peerBranch = "JayKKumar01-";
+
+// Size of each file transfer chunk
 const chunkSize = 1024 * 256;
+
+// Generate a random ID for the current peer
 const randomId = Math.floor(100000 + Math.random() * 900000);
 const peerId = `${peerBranch}${randomId}`;
+
+// Create a Peer instance with the generated peer ID
 const peer = new Peer(peerId);
 
+// DOM elements
 const logsTextarea = document.getElementById('logs');
 const targetPeerIdInput = document.getElementById('targetPeerId');
 const transferContainer = document.getElementById('transfer-container');
@@ -15,11 +23,13 @@ const fileNameElement = document.getElementById('fileName');
 const progressBar = document.getElementById('progress-bar');
 const progressText = document.getElementById('progress-text');
 
+// Connection and file transfer state variables
 let conn;
 const receivedFileData = new Map();
 const sendFileData = new Map();
 let isFileBeingTransfered = false;
 
+// Wait for the DOM content to be fully loaded before executing script
 document.addEventListener('DOMContentLoaded', () => {
     // Event listeners for file input and file list
     appendLog(`My ID is: ${randomId}`);
@@ -28,51 +38,47 @@ document.addEventListener('DOMContentLoaded', () => {
     ListContainer.addEventListener('click', handleFileListClick);
 });
 
+// Event handler when Peer instance is open (connection established)
 peer.on('open', () => appendLog('Connected!'));
 
+// Event handler when a connection with a peer is established
 peer.on('connection', setupConnection);
 
+// Function to establish a connection with the target peer
 function connect() {
-    // Establish a connection with the target peer
     const targetPeerId = targetPeerIdInput.value.trim();
     if (targetPeerId !== '') {
-        conn = peer.connect(peerBranch + targetPeerId, { reliable: true });
-        conn.on('open', () => handleConnectionOpen(targetPeerId));
-        conn.on('data', handleData);
+        // Connect to the target peer using PeerJS
+        let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
+        connection.on('open', () => setupConnection(connection));
     }
 }
 
+// Function to append log messages to the textarea
 function appendLog(log) {
-    // Log messages to the textarea
     logsTextarea.value += `${log}\n`;
     logsTextarea.scrollTop = logsTextarea.scrollHeight;
 }
 
+// Function to display the file transfer window
 function showFileTransferWindow() {
-    // Display the file transfer window
     transferContainer.style.display = 'block';
     roomContainer.classList.add('connected');
 }
 
+// Event handler when a peer connection is established
 function setupConnection(connection) {
-    // Setup connection when a peer connection is established
     conn = connection;
     const remoteId = conn.peer.replace(peerBranch, '');
     appendLog(`Connected to ${remoteId}`);
+    targetPeerIdInput.value = '';
     showFileTransferWindow();
     conn.on('data', handleData);
     conn.on('error', (err) => appendLog(`Connection error: ${err}`));
 }
 
-function handleConnectionOpen(targetPeerId) {
-    // Handle actions when the connection is open
-    appendLog(`Connected to ${targetPeerId}`);
-    targetPeerIdInput.value = '';
-    showFileTransferWindow();
-}
-
+// Event handler for file selection changes
 function handleFileSelection() {
-    // Handle file selection changes
     const selectedFiles = fileInput.files;
     const fileList = document.getElementById('fileList');
 
@@ -94,8 +100,8 @@ function handleFileSelection() {
     }
 }
 
+// Event handler for file list item click events
 function handleFileListClick(event) {
-    // Handle file list item click events
     const item = event.target;
     const fileListItems = document.querySelectorAll('#fileList li');
 
@@ -122,8 +128,8 @@ function handleFileListClick(event) {
     }
 }
 
+// Event handler for data received from the peer
 function handleData(data) {
-    // Handle data received from the peer
     if (data.type === 'file') {
         // Handle file data
         setTimeout(() => handleFileData(data), 0);
@@ -137,8 +143,8 @@ function handleData(data) {
     }
 }
 
+// Function to handle signaling data
 function handleSignal(data) {
-    // Handle signaling data
     const fileMap = receivedFileData.get(data.id);
     updateProgressBar("Upload", data.progress);
 
@@ -166,8 +172,8 @@ function handleSignal(data) {
     }
 }
 
+// Function to trigger file download
 function downloadFile(fileName, fileData) {
-    // Trigger file download
     const blob = new Blob([fileData], { type: 'application/octet-stream' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -176,13 +182,13 @@ function downloadFile(fileName, fileData) {
     link.remove();
 }
 
+// Function to generate a random ID for file transfer
 function generateFileTransferId() {
-    // Generate a random ID for file transfer
     return Math.floor(100000 + Math.random() * 900000);
 }
 
+// Function to display progress container for file transfer
 function showProgressContainer(str, fileName, index) {
-    // Display progress container for file transfer
     fileNameElement.textContent = `${index}: ${fileName}`;
     progressContainer.style.display = 'block';
     transferContainer.style.display = 'none';
@@ -191,20 +197,20 @@ function showProgressContainer(str, fileName, index) {
     appendLog(`${index}: File transfer started: ${fileName}`);
 }
 
+// Function to update progress bar during file transfer
 function updateProgressBar(str, progress) {
-    // Update progress bar during file transfer
     progressBar.style.width = `${progress}%`;
     progressText.textContent = `${str}: ${progress}%`;
 }
 
+// Function to hide progress container after file transfer completion
 function hideProgressContainer() {
-    // Hide progress container after file transfer completion
     progressContainer.style.display = 'none';
     transferContainer.style.display = 'block';
 }
 
+// Function to send file chunk to the peer
 function sendChunk(fileMap) {
-    // Send file chunk to the peer
     const offset = fileMap.offset;
     const chunk = fileMap.fileData.slice(offset, offset + chunkSize);
     conn.send({
@@ -218,8 +224,8 @@ function sendChunk(fileMap) {
     fileMap.offset += chunk.byteLength;
 }
 
+// Function to initiate file transfer
 function sendFile() {
-    // Initiate file transfer
     if (isFileBeingTransfered) {
         appendLog('File transfer is already in progress.');
         return;
@@ -234,8 +240,8 @@ function sendFile() {
     }
 }
 
+// Function to send multiple files to the peer
 function sendFiles(index) {
-    // Send multiple files to the peer
     const file = fileInput.files[index];
     const fileTransferId = generateFileTransferId();
     const indexInfo = `(${index + 1}/${fileInput.files.length})`;
@@ -263,13 +269,13 @@ function sendFiles(index) {
     reader.readAsArrayBuffer(file);
 }
 
+// Function to send progress update to the peer
 function updateSender(id, progress) {
-    // Send progress update to the peer
     conn.send({ type: 'signal', id: id, progress: progress });
 }
 
+// Function to handle incoming file data from the peer
 function handleFileData(data) {
-    // Handle incoming file data from the peer
     const fileName = data.name;
     const fileData = data.data;
     const offset = data.offset;
