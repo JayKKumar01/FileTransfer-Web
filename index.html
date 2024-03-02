@@ -44,6 +44,17 @@
     <div id="logs-container">
         <textarea id="logs" readonly></textarea>
     </div>
+    <div id="chunk-size-dropdown">
+        <label for="chunkSizeSelect">Chunk Size:</label>
+        <select id="chunkSizeSelect" onchange="updateChunkSize()">
+            <script>
+                for (let i = 0, size = 64; i < 10; i++, size *= 2) {
+                    const isDefault = size === 256;
+                    document.write(`<option value="${size * 1024}"${isDefault ? ' selected' : ''}>${size} KB</option>`);
+                }
+            </script>
+        </select>
+    </div>
 
     <script src="script.js"></script>
 </body>

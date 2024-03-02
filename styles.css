@@ -201,3 +201,30 @@ button#connectButton:hover,
 #fileList li:hover {
     color: #ff0000; /* Change color on hover (optional) */
 }
+
+/* Add these styles to position the chunk-size-dropdown */
+#chunk-size-dropdown {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 999;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 8px;
+    color: #fff;
+}
+
+#chunk-size-dropdown label,
+#chunk-size-dropdown select {
+    color: #fff;
+    margin-right: 5px;
+}
+
+#chunkSizeSelect {
+    background-color: #555;
+    color: #fff;
+    border: 1px solid #777;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+}

@@ -2,7 +2,13 @@
 const peerBranch = "JayKKumar01-";
 
 // Size of each file transfer chunk
-const chunkSize = 1024 * 256;
+let chunkSize = 1024 * 256;
+
+function updateChunkSize() {
+    const chunkSizeSelect = document.getElementById('chunkSizeSelect');
+    chunkSize = parseInt(chunkSizeSelect.value);
+    appendLog(`Chunk size updated to ${chunkSize / 1024} KB.`);
+}
 
 // Generate a random ID for the current peer
 const randomId = Math.floor(100000 + Math.random() * 900000);
@@ -28,9 +34,12 @@ let conn;
 const receivedFileData = new Map();
 const sendFileData = new Map();
 let isFileBeingTransfered = false;
+var time;
+var transferTime;
 
 // Wait for the DOM content to be fully loaded before executing script
 document.addEventListener('DOMContentLoaded', () => {
+    
     // Event listeners for file input and file list
     appendLog(`My ID is: ${randomId}`);
     fileInput.addEventListener('change', handleFileSelection);
@@ -43,6 +52,7 @@ peer.on('open', () => appendLog('Connected!'));
 
 // Event handler when a connection with a peer is established
 peer.on('connection', setupConnection);
+peer.on('disconnected', handleDisconnect);
 
 // Function to establish a connection with the target peer
 function connect() {
@@ -64,6 +74,12 @@ function appendLog(log) {
 function showFileTransferWindow() {
     transferContainer.style.display = 'block';
     roomContainer.classList.add('connected');
+}
+
+function handleDisconnect() {
+    appendLog('Disconnected from peer.');
+    // Add any additional actions you want to perform upon disconnection
+    // For example, you might want to reset the UI or display a message to the user.
 }
 
 // Event handler when a peer connection is established
@@ -168,13 +184,21 @@ function showProgressContainer(str, fileName, index) {
     progressBar.style.width = '0%';
     progressText.textContent = `${str}: 0%`;
     appendLog(`${index}: File transfer started: ${fileName}`);
+    time = new Date();
+    transferTime = time;
 }
 
 // Function to update progress bar during file transfer
-function updateProgressBar(str, progress) {
+function updateProgressBar(str, progress, transferRate) {
     progressBar.style.width = `${progress}%`;
-    progressText.textContent = `${str}: ${progress}%`;
+
+    progressText.textContent = `${str}: ${progress}% (${transferRate} KB/s)`;
+
 }
+// function updateProgressBar(str, progress) {
+//     progressBar.style.width = `${progress}%`;
+//     progressText.textContent = `${str}: ${progress}%`;
+// }
 
 // Function to hide progress container after file transfer completion
 function hideProgressContainer() {
@@ -185,7 +209,9 @@ function hideProgressContainer() {
 // Function to handle signaling data
 function handleSignal(data) {
     const fileMap = receivedFileData.get(data.id);
-    updateProgressBar("Upload", data.progress);
+
+    updateProgressBar("Upload", data.progress, data.transferRate);
+    // updateProgressBar("Upload", data.progress);
 
     if (fileMap.offset < fileMap.fileSize) {
         // Continue sending chunks if file transfer is incomplete
@@ -196,7 +222,12 @@ function handleSignal(data) {
         const index = fileMap.index;
         sendFileData.delete(data.id);
 
-        appendLog(`Transfer completed!`);
+        const timeDiff = new Date() - time;
+        const transferRate = calculateTransferRate(fileMap.fileSize, timeDiff);
+        appendLog(`File transfer completed in ${timeDiff / 1000} seconds. Transfer rate: ${transferRate} KB/s`);
+
+
+        // appendLog(`Transfer completed!`);
 
         if (index + 1 < fileInput.files.length) {
             // Send the next file if available
@@ -220,7 +251,7 @@ function sendChunk(fileMap) {
         data: chunk,
         name: fileMap.fileName,
         offset: offset,
-        totalSize: fileMap.fileSize,
+        totalSize: fileMap.fileSize
     });
     fileMap.offset += chunk.byteLength;
 }
@@ -262,6 +293,7 @@ function sendFiles(index) {
             offset: 0,
             fileName: file.name,
             fileSize: file.size,
+            lastChunk: 0
         };
         receivedFileData.set(fileTransferId, fileMap);
         setTimeout(() => sendChunk(fileMap), 0);
@@ -271,8 +303,8 @@ function sendFiles(index) {
 }
 
 // Function to send progress update to the peer
-function updateSender(id, progress) {
-    conn.send({ type: 'signal', id: id, progress: progress });
+function updateSender(id, progress,transferRate) {
+    conn.send({ type: 'signal', id: id, progress: progress, transferRate: transferRate });
 }
 
 // Function to handle incoming file data from the peer
@@ -294,8 +326,11 @@ function handleFileData(data) {
     const receivedSize = fileTransferInfo.totalSize;
 
     const progress = Math.floor((receivedSize / totalSize) * 100);
-    updateProgressBar("Download", progress);
-    updateSender(fileTransferId, progress);
+    
+    const transferRate = Math.floor((fileData.byteLength / 1024)/((new Date() - transferTime) / 1000));
+    transferTime = new Date();
+    updateProgressBar("Download", progress,transferRate);
+    updateSender(fileTransferId, progress,transferRate);
 
     if (receivedSize === totalSize) {
         // File received completely, initiate download
@@ -318,4 +353,10 @@ function handleFileData(data) {
             appendLog("Done!");
         }, 0);
     }
+}
+
+function calculateTransferRate(fileSize, timeDiff) {
+    // Calculate transfer rate in KB/s
+    const transferRate = (fileSize / 1024) / (timeDiff / 1000);
+    return transferRate.toFixed(2);
 }
