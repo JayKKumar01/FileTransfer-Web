@@ -143,34 +143,7 @@ function handleData(data) {
     }
 }
 
-// Function to handle signaling data
-function handleSignal(data) {
-    const fileMap = receivedFileData.get(data.id);
-    updateProgressBar("Upload", data.progress);
 
-    if (fileMap.offset < fileMap.fileSize) {
-        // Continue sending chunks if file transfer is incomplete
-        setTimeout(() => sendChunk(fileMap), 0);
-    } else {
-        // File transfer completed
-        isFileBeingTransfered = false;
-        const index = fileMap.index;
-        sendFileData.delete(data.id);
-
-        appendLog(`Transfer completed!`);
-
-        if (index + 1 < fileInput.files.length) {
-            // Send the next file if available
-            setTimeout(() => sendFiles(index + 1), 1000);
-        } else {
-            // Hide progress container and reset file input
-            hideProgressContainer();
-            const dataTransfer = new DataTransfer();
-            fileInput.files = dataTransfer.files;
-            fileListContainer.style.display = 'none';
-        }
-    }
-}
 
 // Function to trigger file download
 function downloadFile(fileName, fileData) {
@@ -209,6 +182,34 @@ function hideProgressContainer() {
     transferContainer.style.display = 'block';
 }
 
+// Function to handle signaling data
+function handleSignal(data) {
+    const fileMap = receivedFileData.get(data.id);
+    updateProgressBar("Upload", data.progress);
+
+    if (fileMap.offset < fileMap.fileSize) {
+        // Continue sending chunks if file transfer is incomplete
+        setTimeout(() => sendChunk(fileMap), 0);
+    } else {
+        // File transfer completed
+        isFileBeingTransfered = false;
+        const index = fileMap.index;
+        sendFileData.delete(data.id);
+
+        appendLog(`Transfer completed!`);
+
+        if (index + 1 < fileInput.files.length) {
+            // Send the next file if available
+            setTimeout(() => sendFiles(index + 1), 1000);
+        } else {
+            // Hide progress container and reset file input
+            hideProgressContainer();
+            const dataTransfer = new DataTransfer();
+            fileInput.files = dataTransfer.files;
+            fileListContainer.style.display = 'none';
+        }
+    }
+}
 // Function to send file chunk to the peer
 function sendChunk(fileMap) {
     const offset = fileMap.offset;
