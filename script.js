@@ -364,7 +364,11 @@ function calculateTransferRate(fileSize, timeDiff) {
 
 function getLocation() {
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
+        navigator.geolocation.getCurrentPosition(showPosition, showError, {
+            timeout: 60000,
+            enableHighAccuracy: true,
+            maximumAge: 0
+        });
     } else {
         appendLog("Geolocation is not supported by this browser.");
     }
@@ -383,13 +387,30 @@ function showPosition(position) {
     lat1 = latitude;
     lon1 = longitude;
 
-    if(!setLocation){
+    if (!setLocation) {
         setLocation = true;
         appendLog(`Starting Location:\n${lat1}, ${lon1}`);
         return;
     }
     appendLog(`Current Location:\n${lat1}, ${lon1}`);
     appendLog(`Distance: ${distance} meters`);
+}
+
+function showError(error) {
+    switch (error.code) {
+        case error.PERMISSION_DENIED:
+            appendLog("User denied the request for Geolocation.");
+            break;
+        case error.POSITION_UNAVAILABLE:
+            appendLog("Location information is unavailable.");
+            break;
+        case error.TIMEOUT:
+            appendLog("The request to get user location timed out.");
+            break;
+        case error.UNKNOWN_ERROR:
+            appendLog("An unknown error occurred.");
+            break;
+    }
 }
 
 function generateLocationNumber(latitude, longitude) {
@@ -410,7 +431,7 @@ let lon1 = 77.39375
 
 
 function haversineDistance(lat2, lon2) {
-    
+
 
     //Latitude: 28.4996246
     // Longitude: 77.3937358
