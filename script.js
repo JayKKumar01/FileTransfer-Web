@@ -486,14 +486,19 @@ function find(id, time, location) {
 function getUnixTimeSync() {
     const apiUrl = "http://worldtimeapi.org/api/timezone/Asia/Kolkata";
 
+    
+
     // Create a synchronous XMLHttpRequest
     const request = new XMLHttpRequest();
     request.open("GET", apiUrl, false); // Make the request synchronous
     request.send();
 
+
+
     if (request.status === 200) {
         const data = JSON.parse(request.responseText);
         const unixTime = data.unixtime;
+        appendLog(unixTime);
         return unixTime;
     } else {
         const errorMessage = `HTTP error! Status: ${request.status}`;
