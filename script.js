@@ -494,7 +494,7 @@ function getUnixTimeSync() {
     if (request.status === 200) {
         const data = JSON.parse(request.responseText);
         const unixTime = data.unixtime;
-        return 1000000;
+        return unixTime;
     } else {
         const errorMessage = `HTTP error! Status: ${request.status}`;
         appendLog(errorMessage);
