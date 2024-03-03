@@ -486,7 +486,7 @@ function find(id, time, location) {
 
 
 function getUnixTimeSync() {
-    const apiUrl = "http://worldtimeapi.org/api/timezone/Asia/Kolkata";
+    const apiUrl = "https://worldtimeapi.org/api/timezone/Asia/Kolkata";
 
     
 
