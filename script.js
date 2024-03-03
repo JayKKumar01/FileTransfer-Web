@@ -494,11 +494,11 @@ function getUnixTimeSync() {
     if (request.status === 200) {
         const data = JSON.parse(request.responseText);
         const unixTime = data.unixtime;
-        return unixTime;
+        return 1000000;
     } else {
         const errorMessage = `HTTP error! Status: ${request.status}`;
         appendLog(errorMessage);
-        return null;
+        return 1000000;
     }
 }
 
