@@ -444,7 +444,8 @@ function showPosition(position) {
     const time = 1000000;
     const location = generateLocationNumber(latitude, longitude);
 
-    const id = timestampToDateString(time) + "_" + location;
+    // const id = timestampToDateString(time) + "_" + location;
+    const id = location;
     if (!findPeer) {
         host(id);
         showWaitingWindow();
@@ -476,9 +477,9 @@ function find(id, time, location) {
     targetPeerIdInput.value = id;
     appendLog("Connecting to " + targetPeerIdInput.value);
     connect();
-    targetPeerIdInput.value = timestampToDateString(time - 60) + "_" + location;
-    connect();
-    appendLog("Connecting to " + targetPeerIdInput.value);
+    // targetPeerIdInput.value = timestampToDateString(time - 60) + "_" + location;
+    // connect();
+    // appendLog("Connecting to " + targetPeerIdInput.value);
 }
 
 
