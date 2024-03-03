@@ -440,12 +440,12 @@ function showPosition(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
 
-    // const time = getUnixTimeSync();
-    const time = 1000000;
+    const time = getUnixTimeSync();
+    // const time = 1000000;
     const location = generateLocationNumber(latitude, longitude);
 
-    // const id = timestampToDateString(time) + "_" + location;
-    const id = location;
+    const id = timestampToDateString(time) + "_" + location;
+    // const id = location;
     if (!findPeer) {
         host(id);
         showWaitingWindow();
@@ -477,9 +477,9 @@ function find(id, time, location) {
     targetPeerIdInput.value = id;
     appendLog("Connecting to " + targetPeerIdInput.value);
     connect();
-    // targetPeerIdInput.value = timestampToDateString(time - 60) + "_" + location;
-    // connect();
-    // appendLog("Connecting to " + targetPeerIdInput.value);
+    targetPeerIdInput.value = timestampToDateString(time - 60) + "_" + location;
+    connect();
+    appendLog("Connecting to " + targetPeerIdInput.value);
 }
 
 
@@ -500,7 +500,6 @@ function getUnixTimeSync() {
     if (request.status === 200) {
         const data = JSON.parse(request.responseText);
         const unixTime = data.unixtime;
-        appendLog(unixTime);
         return unixTime;
     } else {
         const errorMessage = `HTTP error! Status: ${request.status}`;
