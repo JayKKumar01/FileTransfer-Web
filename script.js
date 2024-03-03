@@ -440,7 +440,8 @@ function showPosition(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
 
-    const time = getUnixTimeSync();
+    // const time = getUnixTimeSync();
+    const time = 1000000;
     const location = generateLocationNumber(latitude, longitude);
 
     const id = timestampToDateString(time) + "_" + location;
