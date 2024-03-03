@@ -18,7 +18,7 @@ textarea#logs {
     resize: none;
     overflow-y: scroll;
     position: fixed;
-    bottom: 0;
+    bottom: 0px;
     right: 0;
     margin: 20px;
     border: 1px solid #333; /* Dark border color */

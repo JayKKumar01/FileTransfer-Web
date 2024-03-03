@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.addEventListener('change', handleFileSelection);
     var ListContainer = document.getElementById('fileList');
     ListContainer.addEventListener('click', handleFileListClick);
+
 });
 
 
@@ -71,7 +72,18 @@ function connect() {
         // Connect to the target peer using PeerJS
         let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
         connection.on('open', () => setupConnection(connection));
+        connection.on('close', onDataConnectionClose);
+        connection.on('error', onDataConnectionError);
     }
+}
+
+function onDataConnectionClose() {
+    appendLog("Data connection closed");
+}
+
+// Custom function for 'error' event
+function onDataConnectionError(err) {
+    appendLog("Data connection error: " + err);
 }
 
 // Function to append log messages to the textarea
@@ -124,7 +136,7 @@ function setupConnection(connection) {
     conn.on('error', (err) => appendLog(`Connection error: ${err}`));
 }
 
-// Event handler for file selection changes
+// Event handler for file selecthanges
 function handleFileSelection() {
     const selectedFiles = fileInput.files;
     const fileList = document.getElementById('fileList');
@@ -179,7 +191,7 @@ function handleFileListClick(event) {
 function handleData(data) {
     if (data.type === 'file') {
         // Handle file data
-        setTimeout(() => handleFileData(data), 0);
+        handleFileData(data);
     } else if (data.type === 'ready') {
         // Handle signal indicating readiness for file transfer
         showProgressContainer("Download", data.fileName, data.indexInfo);
@@ -238,7 +250,7 @@ function hideProgressContainer() {
 }
 
 // Function to handle signaling data
-function handleSignal(data) {
+async function handleSignal(data) {
     const fileMap = receivedFileData.get(data.id);
 
     updateProgressBar("Upload", data.progress, data.transferRate);
@@ -339,7 +351,7 @@ function updateSender(id, progress, transferRate) {
 }
 
 // Function to handle incoming file data from the peer
-function handleFileData(data) {
+async function handleFileData(data) {
     const fileName = data.name;
     const fileData = data.data;
     const offset = data.offset;
@@ -365,7 +377,9 @@ function handleFileData(data) {
 
     if (receivedSize === totalSize) {
         // File received completely, initiate download
-        appendLog(`Received file: ${fileName}`);
+        const timeDiff = new Date() - time;
+        const transferRate = calculateTransferRate(totalSize, timeDiff);
+        appendLog(`File transfer completed in ${timeDiff / 1000} seconds. Transfer rate: ${transferRate} KB/s`);
         appendLog("Joining...");
         setTimeout(() => {
             const completeFile = new Uint8Array(totalSize);
@@ -426,13 +440,16 @@ function showPosition(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
 
-    const id = generateLocationNumber(latitude, longitude);
+    const time = getUnixTimeSync();
+    const location = generateLocationNumber(latitude, longitude);
+
+    const id = timestampToDateString(time) + "_" + location;
     if (!findPeer) {
         host(id);
         showWaitingWindow();
         appendLog(`Host ID: ${id}`);
-    }else{
-        find(id);
+    } else {
+        find(id, time, location);
         showWaitingWindow();
     }
 
@@ -454,7 +471,56 @@ function host(peerId) {
     handlePeer();
 }
 
-function find(peerId) {
-    targetPeerIdInput.value = peerId;
+function find(id, time, location) {
+    targetPeerIdInput.value = id;
+    appendLog("Connecting to " + targetPeerIdInput.value);
     connect();
+    targetPeerIdInput.value = timestampToDateString(time - 60) + "_" + location;
+    connect();
+    appendLog("Connecting to " + targetPeerIdInput.value);
+}
+
+
+
+
+function getUnixTimeSync() {
+    const apiUrl = "http://worldtimeapi.org/api/timezone/Asia/Kolkata";
+
+    // Create a synchronous XMLHttpRequest
+    const request = new XMLHttpRequest();
+    request.open("GET", apiUrl, false); // Make the request synchronous
+    request.send();
+
+    if (request.status === 200) {
+        const data = JSON.parse(request.responseText);
+        const unixTime = data.unixtime;
+        return unixTime;
+    } else {
+        const errorMessage = `HTTP error! Status: ${request.status}`;
+        appendLog(errorMessage);
+        return null;
+    }
+}
+
+function timestampToDateString(timestamp) {
+
+    const date = new Date(timestamp*1000);
+
+    const seconds = date.getSeconds();
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    const dateString = `${year}-${month}-${day}_${hours}_${minutes}`;
+    return dateString;
+}
+
+
+function logTime() {
+    const unixTime = getUnixTimeSync();
+    appendLog("Date: " + timestampToDateString(unixTime));
+    appendLog("Date: " + timestampToDateString(unixTime-60));
 }
