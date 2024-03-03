@@ -2,18 +2,12 @@
 const peerBranch = "JayKKumar01-";
 
 // Size of each file transfer chunk
-let chunkSize = 1024 * 16;
-let UPS = 5;
+let chunkSize = 1024 * 256;
 
-// function updateChunkSize() {
-//     const chunkSizeSelect = document.getElementById('chunkSizeSelect');
-//     chunkSize = parseInt(chunkSizeSelect.value);
-//     appendLog(`Chunk size updated to ${chunkSize / 1024} KB.`);
-// }
-function updateUPS() {
+function updateChunkSize() {
     const chunkSizeSelect = document.getElementById('chunkSizeSelect');
-    UPS = parseInt(chunkSizeSelect.value);
-    appendLog(`UPS updated to ${UPS}`);
+    chunkSize = parseInt(chunkSizeSelect.value);
+    appendLog(`Chunk size updated to ${chunkSize / 1024} KB.`);
 }
 
 // Generate a random ID for the current peer
@@ -45,7 +39,6 @@ const sendFileData = new Map();
 let isFileBeingTransfered = false;
 var time;
 var transferTime;
-var lastTransferTime;
 
 let setLocation = false;
 let findPeer = false;
@@ -244,8 +237,6 @@ function updateProgressBar(str, progress, transferRate) {
 
     progressText.textContent = `${str}: ${progress}% (${transferRate} KB/s)`;
 
-    chunkSize = transferRate * Math.floor(1024 / UPS);
-
 }
 // function updateProgressBar(str, progress) {
 //     progressBar.style.width = `${progress}%`;
@@ -258,14 +249,8 @@ function hideProgressContainer() {
     transferContainer.style.display = 'block';
 }
 
-function changeChunkSize(sendTime) {
-    const diff = new Date() - sendTime;
-
-}
-
 // Function to handle signaling data
 async function handleSignal(data) {
-    // changeChunkSize(data.sendTime);
     const fileMap = receivedFileData.get(data.id);
 
     updateProgressBar("Upload", data.progress, data.transferRate);
@@ -296,7 +281,6 @@ async function handleSignal(data) {
             const dataTransfer = new DataTransfer();
             fileInput.files = dataTransfer.files;
             fileListContainer.style.display = 'none';
-            chunkSize = 1024 * 16;
         }
     }
 }
@@ -304,7 +288,6 @@ async function handleSignal(data) {
 function sendChunk(fileMap) {
     const offset = fileMap.offset;
     const chunk = fileMap.fileData.slice(offset, offset + chunkSize);
-
     conn.send({
         type: 'file',
         id: fileMap.fileTransferId,
@@ -364,12 +347,7 @@ function sendFiles(index) {
 
 // Function to send progress update to the peer
 function updateSender(id, progress, transferRate) {
-    conn.send({
-        type: 'signal',
-        id: id,
-        progress: progress,
-        transferRate: transferRate
-    });
+    conn.send({ type: 'signal', id: id, progress: progress, transferRate: transferRate });
 }
 
 // Function to handle incoming file data from the peer
@@ -510,7 +488,7 @@ function find(id, time, location) {
 function getUnixTimeSync() {
     const apiUrl = "https://worldtimeapi.org/api/timezone/Asia/Kolkata";
 
-
+    
 
     // Create a synchronous XMLHttpRequest
     const request = new XMLHttpRequest();
@@ -532,7 +510,7 @@ function getUnixTimeSync() {
 
 function timestampToDateString(timestamp) {
 
-    const date = new Date(timestamp * 1000);
+    const date = new Date(timestamp*1000);
 
     const seconds = date.getSeconds();
 
@@ -550,5 +528,5 @@ function timestampToDateString(timestamp) {
 function logTime() {
     const unixTime = getUnixTimeSync();
     appendLog("Date: " + timestampToDateString(unixTime));
-    appendLog("Date: " + timestampToDateString(unixTime - 60));
+    appendLog("Date: " + timestampToDateString(unixTime-60));
 }
