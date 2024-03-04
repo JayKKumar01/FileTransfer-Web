@@ -2,7 +2,7 @@
 const peerBranch = "JayKKumar01-";
 
 // Size of each file transfer chunk
-let chunkSize = 1024 * 16;
+let chunkSize = 1024 * 256;
 let UPS = 5;
 
 // function updateChunkSize() {
@@ -244,7 +244,7 @@ function updateProgressBar(str, progress, transferRate) {
 
     progressText.textContent = `${str}: ${progress}% (${transferRate} KB/s)`;
 
-    chunkSize = transferRate * Math.floor(1024 / UPS);
+    //chunkSize = transferRate * Math.floor(1024 / UPS);
 
 }
 // function updateProgressBar(str, progress) {
@@ -296,7 +296,7 @@ async function handleSignal(data) {
             const dataTransfer = new DataTransfer();
             fileInput.files = dataTransfer.files;
             fileListContainer.style.display = 'none';
-            chunkSize = 1024 * 16;
+            //chunkSize = 1024 * 16;
         }
     }
 }
