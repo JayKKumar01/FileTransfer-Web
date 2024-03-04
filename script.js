@@ -300,9 +300,10 @@ function handleSignal(data) {
 }
 // Function to send file chunk to the peer
 function sendChunk(fileMap) {
+    const t = new Date();
     const offset = fileMap.offset;
     const chunk = fileMap.fileData.slice(offset, offset + chunkSize);
-
+    appendLog(offset+": "+(new Date()-t)+" ms");
     conn.send({
         type: 'file',
         id: fileMap.fileTransferId,
