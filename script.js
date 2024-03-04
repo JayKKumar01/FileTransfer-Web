@@ -5,11 +5,11 @@ const peerBranch = "JayKKumar01-";
 let chunkSize = 1024 * 256;
 let UPS = 5;
 
-// function updateChunkSize() {
-//     const chunkSizeSelect = document.getElementById('chunkSizeSelect');
-//     chunkSize = parseInt(chunkSizeSelect.value);
-//     appendLog(`Chunk size updated to ${chunkSize / 1024} KB.`);
-// }
+function updateChunkSize() {
+    const chunkSizeSelect = document.getElementById('chunkSizeSelect');
+    chunkSize = parseInt(chunkSizeSelect.value);
+    appendLog(`Chunk size updated to ${chunkSize / 1024} KB.`);
+}
 function updateUPS() {
     const chunkSizeSelect = document.getElementById('chunkSizeSelect');
     UPS = parseInt(chunkSizeSelect.value);
@@ -198,14 +198,14 @@ function handleFileListClick(event) {
 function handleData(data) {
     if (data.type === 'file') {
         // Handle file data
-        handleFileData(data);
+        setTimeout(() => handleFileData(data), 0);
     } else if (data.type === 'ready') {
         // Handle signal indicating readiness for file transfer
         showProgressContainer("Download", data.fileName, data.indexInfo);
         isFileBeingTransfered = true;
     } else if (data.type === 'signal') {
         // Handle signaling data
-        handleSignal(data);
+        setTimeout(() => handleSignal(data), 0);
     }
 }
 
@@ -260,11 +260,10 @@ function hideProgressContainer() {
 
 function changeChunkSize(sendTime) {
     const diff = new Date() - sendTime;
-
 }
 
 // Function to handle signaling data
-async function handleSignal(data) {
+function handleSignal(data) {
     // changeChunkSize(data.sendTime);
     const fileMap = receivedFileData.get(data.id);
 
@@ -373,7 +372,7 @@ function updateSender(id, progress, transferRate) {
 }
 
 // Function to handle incoming file data from the peer
-async function handleFileData(data) {
+function handleFileData(data) {
     const fileName = data.name;
     const fileData = data.data;
     const offset = data.offset;
