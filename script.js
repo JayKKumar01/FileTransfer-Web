@@ -2,14 +2,14 @@
 const peerBranch = "JayKKumar01-";
 
 // Size of each file transfer chunk
-let chunkSize = 1024 * 256;
-let UPS = 5;
+let chunkSize = 1024 * 16;
+let UPS = 4;
 
-function updateChunkSize() {
-    const chunkSizeSelect = document.getElementById('chunkSizeSelect');
-    chunkSize = parseInt(chunkSizeSelect.value);
-    appendLog(`Chunk size updated to ${chunkSize / 1024} KB.`);
-}
+// function updateChunkSize() {
+//     const chunkSizeSelect = document.getElementById('chunkSizeSelect');
+//     chunkSize = parseInt(chunkSizeSelect.value);
+//     appendLog(`Chunk size updated to ${chunkSize / 1024} KB.`);
+// }
 function updateUPS() {
     const chunkSizeSelect = document.getElementById('chunkSizeSelect');
     UPS = parseInt(chunkSizeSelect.value);
@@ -57,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.addEventListener('change', handleFileSelection);
     var ListContainer = document.getElementById('fileList');
     ListContainer.addEventListener('click', handleFileListClick);
-
 });
 
 
@@ -244,7 +243,7 @@ function updateProgressBar(str, progress, transferRate) {
 
     progressText.textContent = `${str}: ${progress}% (${transferRate} KB/s)`;
 
-    //chunkSize = transferRate * Math.floor(1024 / UPS);
+    chunkSize = transferRate * Math.floor(1024 / UPS);
 
 }
 // function updateProgressBar(str, progress) {
@@ -295,7 +294,7 @@ function handleSignal(data) {
             const dataTransfer = new DataTransfer();
             fileInput.files = dataTransfer.files;
             fileListContainer.style.display = 'none';
-            //chunkSize = 1024 * 16;
+            chunkSize = 1024 * 16;
         }
     }
 }
