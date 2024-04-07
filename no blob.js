@@ -220,16 +220,6 @@ function downloadFile(fileName, fileData) {
     link.remove();
 }
 
-function downloadBlob(fileName, blob) {
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
-    link.remove();
-
-    // URL.revokeObjectURL(link.href);
-}
-
 // Function to generate a random ID for file transfer
 function generateFileTransferId() {
     return Math.floor(100000 + Math.random() * 900000);
@@ -341,9 +331,6 @@ function sendFile() {
     }
 }
 
-
-
-
 // Function to send multiple files to the peer
 function sendFiles(index) {
     const file = fileInput.files[index];
@@ -391,25 +378,16 @@ function handleFileData(data) {
     const offset = data.offset;
     const fileTransferId = data.id;
 
-    // if (!receivedFileData.has(fileTransferId)) {
-    //     receivedFileData.set(fileTransferId, { chunks: [], totalSize: 0 });
-    // }
     if (!receivedFileData.has(fileTransferId)) {
-        receivedFileData.set(fileTransferId, { blob: new Blob(), totalSize: 0 });
+        receivedFileData.set(fileTransferId, { chunks: [], totalSize: 0 });
     }
 
     const fileTransferInfo = receivedFileData.get(fileTransferId);
-    // fileTransferInfo.chunks[fileTransferInfo.chunks.length] = { chunk: fileData, offset: offset };
-    fileTransferInfo.blob = new Blob([fileTransferInfo.blob, fileData]); // Append received data to the blob
-
+    fileTransferInfo.chunks[fileTransferInfo.chunks.length] = { chunk: fileData, offset: offset };
     fileTransferInfo.totalSize += fileData.byteLength;
-
-    
-    
 
     const totalSize = data.totalSize;
     const receivedSize = fileTransferInfo.totalSize;
-    // const receivedSize = fileTransferInfo.blob.size;
 
     const progress = Math.floor((receivedSize / totalSize) * 100);
 
@@ -424,22 +402,17 @@ function handleFileData(data) {
         const transferRate = calculateTransferRate(totalSize, timeDiff);
         appendLog(`File transfer completed in ${timeDiff / 1000} seconds. Transfer rate: ${transferRate} KB/s`);
         appendLog("Joining...");
-        
         setTimeout(() => {
-            downloadBlob(fileName, fileTransferInfo.blob);
+            const completeFile = new Uint8Array(totalSize);
+            const chunksArray = fileTransferInfo.chunks;
+
+            chunksArray.forEach((data) => {
+                completeFile.set(new Uint8Array(data.chunk), data.offset);
+            });
+
+            downloadFile(fileName, completeFile);
 
             receivedFileData.delete(fileTransferId);
-
-            // const completeFile = new Uint8Array(totalSize);
-            // const chunksArray = fileTransferInfo.chunks;
-
-            // chunksArray.forEach((data) => {
-            //     completeFile.set(new Uint8Array(data.chunk), data.offset);
-            // });
-
-            // downloadFile(fileName, completeFile);
-
-            // receivedFileData.delete(fileTransferId);
 
             hideProgressContainer();
             isFileBeingTransfered = false;
