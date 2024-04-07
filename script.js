@@ -143,7 +143,7 @@ function setupConnection(connection) {
 }
 
 // Event handler for file selecthanges
-function handleFileSelection() {
+async function handleFileSelection() {
     const selectedFiles = fileInput.files;
     const fileList = document.getElementById('fileList');
 
