@@ -99,11 +99,23 @@ function appendLog(log) {
 }
 
 // Function to display the file transfer window
+
+// function showFileTransferWindow() {
+//     try {
+//         transferContainer.style.display = 'block';
+//         roomContainer.style.display = 'none';
+//         controlContainer.style.display = 'none';
+//         waitContainer.style.display = 'none';
+//     } catch (error) {
+//         appendLog(error); // Calling appendLog with the error information
+//     }
+// }
+
 function showFileTransferWindow() {
-    transferContainer.style.display = 'block';
-    roomContainer.style.display = 'none';
-    controlContainer.style.display = 'none';
-    waitContainer.style.display = 'none';
+    document.getElementById('transfer-container').style.display = 'block';
+    document.getElementById('room-container').style.display = 'none';
+    document.getElementById('control-container').style.display = 'none';
+    document.getElementById("wait-container").style.display = 'none';
 }
 
 function showWaitingWindow() {
