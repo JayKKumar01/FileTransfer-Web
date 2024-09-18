@@ -88,7 +88,6 @@ function connect() {
         } else {
             // Wait for the 'open' event if connection isn't open yet
             connection.on('open', () => {
-                //appendLog(`Connected to ${targetPeerId}`);
                 setupConnection(connection);
             });
         }
