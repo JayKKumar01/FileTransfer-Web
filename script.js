@@ -70,9 +70,33 @@ function handlePeer() {
     //peer.on('close',handleClose);
 }
 
-
 // Function to establish a connection with the target peer
 function connect() {
+    const targetPeerId = targetPeerIdInput.value.trim();
+    if (targetPeerId !== '') {
+        // Create the connection
+        let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
+
+        // Handle 'close' and 'error' events first
+        connection.on('close', onDataConnectionClose);
+        connection.on('error', onDataConnectionError);
+
+        // Check if the connection is already open
+        if (connection.open) {
+            // If the connection is already open, set up immediately
+            appendLog(`Connected to ${targetPeerId}`);
+            setupConnection(connection);
+        } else {
+            // Wait for the 'open' event if connection isn't open yet
+            connection.on('open', () => {
+                appendLog(`Connected to ${targetPeerId}`);
+                setupConnection(connection);
+            });
+        }
+    }
+}
+// Function to establish a connection with the target peer
+function connect1() {
     const targetPeerId = targetPeerIdInput.value.trim();
     if (targetPeerId !== '') {
         // Connect to the target peer using PeerJS
