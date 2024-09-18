@@ -106,7 +106,7 @@ function connect() {
         connection.open;
         //connection.on('open', () => {
             appendLog("Already!");
-        //    setupConnection(connection);
+            setupConnection(connection);
         //});
         connection.on('close', onDataConnectionClose);
         connection.on('error', onDataConnectionError);
