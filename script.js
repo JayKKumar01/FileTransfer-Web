@@ -82,7 +82,8 @@ function connect() {
         connection.on('error', onDataConnectionError);
 
         // Check if the connection is already open
-        if (connection.open) {
+        let isConnected = connection.open;
+        if (isConnected) {
             // If the connection is already open, set up immediately
             appendLog(`Already Connected`);
             setupConnection(connection);
@@ -93,6 +94,7 @@ function connect() {
                 setupConnection(connection);
             });
         }
+appendLog(isConnected);
     }
 }
 // Function to establish a connection with the target peer
