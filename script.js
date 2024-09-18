@@ -77,8 +77,12 @@ function connect() {
     if (targetPeerId !== '') {
         // Connect to the target peer using PeerJS
         let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
-        connection.on('open', setupConnection);
+        //connection.on('open', setupConnection);
         //connection.on('open', () => setupConnection(connection));
+        connection.on('open', () => {
+            appendLog(targetPeerId);
+            setupConnection(connection);
+        });
         connection.on('close', onDataConnectionClose);
         connection.on('error', onDataConnectionError);
     }
