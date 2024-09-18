@@ -84,12 +84,12 @@ function connect() {
         // Check if the connection is already open
         if (connection.open) {
             // If the connection is already open, set up immediately
-            appendLog(`Connected to ${targetPeerId}`);
+            appendLog(`Already Connected`);
             setupConnection(connection);
         } else {
             // Wait for the 'open' event if connection isn't open yet
             connection.on('open', () => {
-                appendLog(`Connected to ${targetPeerId}`);
+                //appendLog(`Connected to ${targetPeerId}`);
                 setupConnection(connection);
             });
         }
