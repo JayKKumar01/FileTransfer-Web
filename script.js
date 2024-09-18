@@ -104,10 +104,10 @@ function connect() {
         //connection.on('open', setupConnection);
         //connection.on('open', () => setupConnection(connection));
         connection.open;
-        //connection.on('open', () => {
+        connection.on('open', () => {
             appendLog("Already!");
             setupConnection(connection);
-        //});
+        });
         connection.on('close', onDataConnectionClose);
         connection.on('error', onDataConnectionError);
     }
