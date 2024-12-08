@@ -69,7 +69,7 @@ function handlePeer() {
     peer.on('disconnected', handleDisconnect);
     //peer.on('close',handleClose);
 }
-function connect3() {
+function connect() {
     const targetPeerId = targetPeerIdInput.value.trim();
     if (targetPeerId !== '') {
         // Create the connection
@@ -125,7 +125,7 @@ appendLog(isConnected);
     }
 }
 // Function to establish a connection with the target peer
-function connect() {
+function connect1() {
     const targetPeerId = targetPeerIdInput.value.trim();
     if (targetPeerId !== '') {
         // Connect to the target peer using PeerJS
