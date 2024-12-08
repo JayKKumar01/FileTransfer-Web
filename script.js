@@ -132,7 +132,7 @@ function connect() {
         let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
         connection.on('open', setupConnection);
         //connection.on('open', () => setupConnection(connection));
-        //connection.open;
+        connection.open;
         //connection.on('open', () => {
         //    appendLog("Already!");
         //    setTimeout(() => setupConnection(connection), 0);
