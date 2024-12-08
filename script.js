@@ -69,7 +69,7 @@ function handlePeer() {
     peer.on('disconnected', handleDisconnect);
     //peer.on('close',handleClose);
 }
-function connect() {
+function connect3() {
     const targetPeerId = targetPeerIdInput.value.trim();
     if (targetPeerId !== '') {
         // Create the connection
@@ -125,19 +125,19 @@ appendLog(isConnected);
     }
 }
 // Function to establish a connection with the target peer
-function connect1() {
+function connect() {
     const targetPeerId = targetPeerIdInput.value.trim();
     if (targetPeerId !== '') {
         // Connect to the target peer using PeerJS
         let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
-        //connection.on('open', setupConnection);
+        connection.on('open', setupConnection);
         //connection.on('open', () => setupConnection(connection));
         //connection.open;
-        connection.on('open', () => {
-            appendLog("Already!");
-            setTimeout(() => setupConnection(connection), 0);
+        //connection.on('open', () => {
+        //    appendLog("Already!");
+        //    setTimeout(() => setupConnection(connection), 0);
             
-        });
+        //});
         connection.on('close', onDataConnectionClose);
         connection.on('error', onDataConnectionError);
     }
