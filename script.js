@@ -1,11 +1,10 @@
-// Function to keep the screen awake
+// SECTION 1: Screen Wake Lock Functionality
 async function keepScreenAwake() {
     try {
         if ('wakeLock' in navigator) {
             const wakeLock = await navigator.wakeLock.request('screen');
             console.log('Screen wake lock is active.');
 
-            // Handle visibility change (release wake lock if page is hidden)
             document.addEventListener('visibilitychange', async () => {
                 if (document.visibilityState === 'visible') {
                     await navigator.wakeLock.request('screen');
@@ -23,47 +22,29 @@ async function keepScreenAwake() {
     }
 }
 
-// Call the function when the website is loaded
 keepScreenAwake();
-// Prefix for generating unique peer IDs
+
+// SECTION 2: Constants and Variables
 const prefix = "JayKKumar01-File-Transfer-";
-
-// Function to get today's date in a unique format (e.g., YYYYMMDD)
-function getTodayDate() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-    const day = String(today.getDate()).padStart(2, "0");
-    return `${year}${month}${day}`;
-}
-
-// // Generate the unique peer ID
-const peerBranch = `${prefix}${getTodayDate()}-`;
-
-// Size of each file transfer chunk
-const initChunkSize = 1024 * 1024;
+const initChunkSize = 1024 * 1024; // Initial chunk size for file transfer
 let chunkSize = initChunkSize;
 let shouldChangeChunkSize = false;
 let UPS = 4;
 
-
-function updateUPS() {
-    const chunkSizeSelect = document.getElementById('chunkSizeSelect');
-    UPS = parseInt(chunkSizeSelect.value);
-    appendLog(`UPS updated to ${UPS}`);
-}
-
-// Generate a random ID for the current peer
+const peerBranch = `${prefix}${getTodayDate()}-`;
 const randomId = Math.floor(100000 + Math.random() * 900000);
 const peerId = `${peerBranch}${randomId}`;
 
-// Create a Peer instance with the generated peer ID
 let peer = new Peer(peerId);
-handlePeer();
+let conn;
+let isFileBeingTransfered = false;
+let time, transferTime;
+
+const receivedFileData = new Map();
+const sendFileData = new Map();
 
 // DOM elements
 const logsTextarea = document.getElementById('logs');
-const targetPeerIdInput = document.getElementById('targetPeerId');
 const transferContainer = document.getElementById('transfer-container');
 const roomContainer = document.getElementById('room-container');
 const controlContainer = document.getElementById('control-container');
@@ -75,14 +56,89 @@ const fileNameElement = document.getElementById('fileName');
 const progressBar = document.getElementById('progress-bar');
 const progressText = document.getElementById('progress-text');
 
-// Connection and file transfer state variables
-let conn;
-const receivedFileData = new Map();
-const sendFileData = new Map();
-let isFileBeingTransfered = false;
-var time;
-var transferTime;
-var lastTransferTime;
+// SECTION 3: Utility Functions
+function getTodayDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}${month}${day}`;
+}
+
+function appendLog(log) {
+    logsTextarea.value += `${log}\n`;
+    logsTextarea.scrollTop = logsTextarea.scrollHeight;
+}
+
+function calculateTransferRate(fileSize, timeDiff) {
+    return ((fileSize / 1024) / (timeDiff / 1000)).toFixed(2);
+}
+
+
+function toggleContainers(visibleContainer, hiddenContainers) {
+    visibleContainer.style.display = 'block';
+    hiddenContainers.forEach(container => container.style.display = 'none');
+}
+
+function updateProgressBar(str, progress, transferRate) {
+    progressBar.style.width = `${progress}%`;
+    progressText.textContent = `${str}: ${progress}% (${transferRate} KB/s)`;
+    if (shouldChangeChunkSize) {
+        chunkSize = transferRate * Math.floor(1024 / UPS);
+    }
+}
+
+function hideProgressContainer() {
+    progressContainer.style.display = 'none';
+    transferContainer.style.display = 'block';
+}
+
+function updateUPS() {
+    const chunkSizeSelect = document.getElementById('chunkSizeSelect');
+    UPS = parseInt(chunkSizeSelect.value);
+    appendLog(`UPS updated to ${UPS}`);
+}
+
+
+// SECTION 4: Peer Connection Management
+function handlePeer() {
+    peer.on('open', () => appendLog(`My ID is: ${randomId}`));
+    peer.on('connection', (incomingConn) => {
+        appendLog(`Incoming connection from: ${incomingConn.peer.split('-').pop()}`);
+        setupConnection(incomingConn);
+    });
+    peer.on('disconnected', () => appendLog('Disconnected from peer.'));
+    peer.on('close', () => appendLog('Peer closed.'));
+}
+
+function setupConnection(connection) {
+    conn = connection;
+    conn.on('open', () => {
+        const remoteId = conn.peer.replace(peerBranch, '');
+        appendLog(`Connected to ${remoteId}`);
+        toggleContainers(transferContainer, [roomContainer, controlContainer, waitContainer]);
+    });
+
+    conn.on('data', handleData);
+    conn.on('close', () => appendLog("Data connection closed."));
+    conn.on('error', (err) => appendLog("Data connection error: " + err));
+}
+
+function connect() {
+    const targetPeerId = document.getElementById('targetPeerId').value.trim();
+    if (targetPeerId !== '') {
+        let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
+        appendLog(`Trying to connect with ID: ${targetPeerId}`);
+        setupConnection(connection);
+    }
+}
+
+handlePeer();
+
+
+// need to organize code after this line... pending
+
+
 
 let setLocation = false;
 let findPeer = false;
@@ -94,62 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     var ListContainer = document.getElementById('fileList');
     ListContainer.addEventListener('click', handleFileListClick);
 });
-
-
-// Event handler when Peer instance is open (connection established)
-function handlePeer() {
-    peer.on('open', () => appendLog(`My ID is: ${randomId}`));
-
-    // Event handler when a connection with a peer is established
-    peer.on('connection', (incomingConn) => {
-        appendLog(`Incoming connection from: ${incomingConn.peer.split('-').pop()}`);
-        setupConnection(incomingConn);
-    });
-    peer.on('disconnected', handleDisconnect);
-    peer.on('close', handleClose);
-}
-function connect() {
-    const targetPeerId = targetPeerIdInput.value.trim();
-    if (targetPeerId !== '') {
-        // Create the connection
-        let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
-        appendLog(`Trying to connect with ID: ${targetPeerId}`);
-
-        setupConnection(connection);
-    }
-}
-
-
-function onDataConnectionClose() {
-    appendLog("Data connection closed");
-}
-
-// Custom function for 'error' event
-function onDataConnectionError(err) {
-    appendLog("Data connection error: " + err);
-}
-
-// Function to append log messages to the textarea
-
-function appendLog(log) {
-    logsTextarea.value += `${log}\n`;
-    logsTextarea.scrollTop = logsTextarea.scrollHeight;
-}
-
-
-// Function to display the file transfer window
-
-function toggleContainers(visibleContainer, hiddenContainers) {
-    visibleContainer.style.display = 'block';
-    hiddenContainers.forEach(container => {
-        container.style.display = 'none';
-    });
-}
-
-// Usage
-function showFileTransferWindow() {
-    toggleContainers(transferContainer, [roomContainer, controlContainer, waitContainer]);
-}
 
 function showWaitingWindow() {
     toggleContainers(waitContainer,[controlContainer]);
@@ -169,23 +169,7 @@ function handleClose() {
     appendLog('Peer closed.');
 }
 
-// Event handler when a peer connection is established
-function setupConnection(connection) {
-    conn = connection;
-    conn.on('open', () => {
-        const remoteId = conn.peer.replace(peerBranch, '');
-        appendLog(`Connected to ${remoteId}`);
 
-        showFileTransferWindow();
-        conn.on('data', handleData);
-    });
-
-    targetPeerIdInput.value = '';
-
-    // Handle 'close' and 'error' events first
-    connection.on('close', onDataConnectionClose);
-    connection.on('error', onDataConnectionError);
-}
 
 // Event handler for file selecthanges
 async function handleFileSelection() {
@@ -292,33 +276,13 @@ function showProgressContainer(str, fileName, index) {
     transferTime = time;
 }
 
-// Function to update progress bar during file transfer
-function updateProgressBar(str, progress, transferRate) {
-    progressBar.style.width = `${progress}%`;
 
-    progressText.textContent = `${str}: ${progress}% (${transferRate} KB/s)`;
-
-    if (shouldChangeChunkSize) {
-        chunkSize = transferRate * Math.floor(1024 / UPS);
-    }
-
-
-
-}
 // function updateProgressBar(str, progress) {
 //     progressBar.style.width = `${progress}%`;
 //     progressText.textContent = `${str}: ${progress}%`;
 // }
 
-// Function to hide progress container after file transfer completion
-function hideProgressContainer() {
-    progressContainer.style.display = 'none';
-    transferContainer.style.display = 'block';
-}
 
-function changeChunkSize(sendTime) {
-    const diff = new Date() - sendTime;
-}
 
 // Function to handle signaling data
 function handleSignal(data) {
@@ -357,22 +321,7 @@ function handleSignal(data) {
         }
     }
 }
-// Function to send file chunk to the peer
-function sendChunk(fileMap) {
-    // const t = new Date();
-    const offset = fileMap.offset;
-    const chunk = fileMap.fileData.slice(offset, offset + chunkSize);
-    // appendLog(offset+": "+(new Date()-t)+" ms");
-    conn.send({
-        type: 'file',
-        id: fileMap.fileTransferId,
-        data: chunk,
-        name: fileMap.fileName,
-        offset: offset,
-        totalSize: fileMap.fileSize
-    });
-    fileMap.offset += chunk.byteLength;
-}
+
 
 // Function to initiate file transfer
 function sendFile() {
@@ -421,6 +370,23 @@ function sendFiles(index) {
     };
 
     reader.readAsArrayBuffer(file);
+}
+
+// Function to send file chunk to the peer
+function sendChunk(fileMap) {
+    // const t = new Date();
+    const offset = fileMap.offset;
+    const chunk = fileMap.fileData.slice(offset, offset + chunkSize);
+    // appendLog(offset+": "+(new Date()-t)+" ms");
+    conn.send({
+        type: 'file',
+        id: fileMap.fileTransferId,
+        data: chunk,
+        name: fileMap.fileName,
+        offset: offset,
+        totalSize: fileMap.fileSize
+    });
+    fileMap.offset += chunk.byteLength;
 }
 
 // Function to send progress update to the peer
@@ -486,11 +452,6 @@ function handleFileData(data) {
     }
 }
 
-function calculateTransferRate(fileSize, timeDiff) {
-    // Calculate transfer rate in KB/s
-    const transferRate = (fileSize / 1024) / (timeDiff / 1000);
-    return transferRate.toFixed(2);
-}
 
 function getLocation(findPeerVal) {
     findPeer = findPeerVal;
