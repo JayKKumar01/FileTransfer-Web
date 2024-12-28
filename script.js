@@ -1,15 +1,52 @@
+// Function to keep the screen awake
+async function keepScreenAwake() {
+    try {
+        if ('wakeLock' in navigator) {
+            const wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Screen wake lock is active.');
+
+            // Handle visibility change (release wake lock if page is hidden)
+            document.addEventListener('visibilitychange', async () => {
+                if (document.visibilityState === 'visible') {
+                    await navigator.wakeLock.request('screen');
+                    console.log('Screen wake lock restored.');
+                } else {
+                    wakeLock.release();
+                    console.log('Screen wake lock released.');
+                }
+            });
+        } else {
+            console.warn('Wake Lock API is not supported on this browser.');
+        }
+    } catch (err) {
+        console.error('Failed to acquire wake lock:', err);
+    }
+}
+
+// Call the function when the website is loaded
+keepScreenAwake();
 // Prefix for generating unique peer IDs
-const peerBranch = "JayKKumar01-";
+const prefix = "JayKKumar01-File-Transfer-";
+
+// Function to get today's date in a unique format (e.g., YYYYMMDD)
+function getTodayDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}${month}${day}`;
+}
+
+// // Generate the unique peer ID
+const peerBranch = `${prefix}${getTodayDate()}-`;
 
 // Size of each file transfer chunk
-let chunkSize = 1024 * 256;
-let UPS = 4;
+const initChunkSize = 1024 * 16;
+let chunkSize = initChunkSize;
+let shouldChangeChunkSize = true;
+let UPS = 2;
 
-// function updateChunkSize() {
-//     const chunkSizeSelect = document.getElementById('chunkSizeSelect');
-//     chunkSize = parseInt(chunkSizeSelect.value);
-//     appendLog(`Chunk size updated to ${chunkSize / 1024} KB.`);
-// }
+
 function updateUPS() {
     const chunkSizeSelect = document.getElementById('chunkSizeSelect');
     UPS = parseInt(chunkSizeSelect.value);
@@ -53,7 +90,6 @@ let findPeer = false;
 // Wait for the DOM content to be fully loaded before executing script
 document.addEventListener('DOMContentLoaded', () => {
     // Event listeners for file input and file list
-    appendLog(`My ID is: ${randomId}`);
     fileInput.addEventListener('change', handleFileSelection);
     var ListContainer = document.getElementById('fileList');
     ListContainer.addEventListener('click', handleFileListClick);
@@ -62,86 +98,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Event handler when Peer instance is open (connection established)
 function handlePeer() {
-    peer.on('open', () => appendLog('Connected!'));
+    peer.on('open', () => appendLog(`My ID is: ${randomId}`));
 
     // Event handler when a connection with a peer is established
-    peer.on('connection', setupConnection);
+    peer.on('connection', (incomingConn) => {
+        appendLog(`Incoming connection from: ${incomingConn.peer.split('-').pop()}`);
+        setupConnection(incomingConn);
+    });
     peer.on('disconnected', handleDisconnect);
-    //peer.on('close',handleClose);
+    peer.on('close', handleClose);
 }
 function connect() {
     const targetPeerId = targetPeerIdInput.value.trim();
     if (targetPeerId !== '') {
         // Create the connection
         let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
+        appendLog(`Trying to connect with ID: ${targetPeerId}`);
 
-        // Handle 'close' and 'error' events first
-        connection.on('close', onDataConnectionClose);
-        connection.on('error', onDataConnectionError);
-
-        // Check if the connection is already open
-        let isConnected = connection.open;
-        if (isConnected) {
-            // If the connection is already open, set up immediately
-            appendLog(`Already Connected to ${targetPeerId}`);
-            setupConnection(connection);
-        } else {
-            // Wait for the 'open' event if connection isn't open yet
-            connection.on('open', () => {
-                setupConnection(connection);
-            });
-        }
-
-        // Log connection state (true/false)
-        appendLog(`Connection open status: ${isConnected}`);
+        setupConnection(connection);
     }
 }
 
-// Function to establish a connection with the target peer
-function connect2() {
-    const targetPeerId = targetPeerIdInput.value.trim();
-    if (targetPeerId !== '') {
-        // Create the connection
-        let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
-
-        // Handle 'close' and 'error' events first
-        connection.on('close', onDataConnectionClose);
-        connection.on('error', onDataConnectionError);
-
-        // Check if the connection is already open
-        let isConnected = connection.open;
-        if (isConnected) {
-            // If the connection is already open, set up immediately
-            appendLog(`Already Connected`);
-            setupConnection(connection);
-        } else {
-            // Wait for the 'open' event if connection isn't open yet
-            connection.on('open', () => {
-                //appendLog(`Connected to ${targetPeerId}`);
-                setupConnection(connection);
-            });
-        }
-appendLog(isConnected);
-    }
-}
-// Function to establish a connection with the target peer
-function connect1() {
-    const targetPeerId = targetPeerIdInput.value.trim();
-    if (targetPeerId !== '') {
-        // Connect to the target peer using PeerJS
-        let connection = peer.connect(peerBranch + targetPeerId, { reliable: true });
-        connection.on('open', setupConnection);
-        //connection.on('open', () => setupConnection(connection));
-        connection.open;
-        //connection.on('open', () => {
-        //    appendLog("Already!");
-        //    setTimeout(() => setupConnection(connection), 0);
-            
-        //});
-        connection.on('close', onDataConnectionClose);
-        connection.on('error', onDataConnectionError);
-    }
-}
 
 function onDataConnectionClose() {
     appendLog("Data connection closed");
@@ -153,10 +130,12 @@ function onDataConnectionError(err) {
 }
 
 // Function to append log messages to the textarea
+
 function appendLog(log) {
     logsTextarea.value += `${log}\n`;
     logsTextarea.scrollTop = logsTextarea.scrollHeight;
 }
+
 
 // Function to display the file transfer window
 
@@ -170,13 +149,6 @@ function showFileTransferWindow() {
         appendLog(error); // Calling appendLog with the error information
     }
 }
-
-// function showFileTransferWindow() {
-//     document.getElementById('transfer-container').style.display = 'block';
-//     document.getElementById('room-container').style.display = 'none';
-//     document.getElementById('control-container').style.display = 'none';
-//     document.getElementById("wait-container").style.display = 'none';
-// }
 
 function showWaitingWindow() {
     waitContainer.style.display = 'block';
@@ -194,24 +166,27 @@ function showRoomContainer() {
 
 function handleDisconnect() {
     appendLog('Disconnected from peer.');
-    // Add any additional actions you want to perform upon disconnection
-    // For example, you might want to reset the UI or display a message to the user.
 }
 function handleClose() {
     appendLog('Peer closed.');
-    // Add any additional actions you want to perform upon disconnection
-    // For example, you might want to reset the UI or display a message to the user.
 }
 
 // Event handler when a peer connection is established
 function setupConnection(connection) {
     conn = connection;
-    const remoteId = conn.peer.replace(peerBranch, '');
-    appendLog(`Connected to ${remoteId}`);
+    conn.on('open', () => {
+        const remoteId = conn.peer.replace(peerBranch, '');
+        appendLog(`Connected to ${remoteId}`);
+
+        showFileTransferWindow();
+        conn.on('data', handleData);
+    });
+
     targetPeerIdInput.value = '';
-    showFileTransferWindow();
-    conn.on('data', handleData);
-    conn.on('error', (err) => appendLog(`Connection error: ${err}`));
+
+    // Handle 'close' and 'error' events first
+    connection.on('close', onDataConnectionClose);
+    connection.on('error', onDataConnectionError);
 }
 
 // Event handler for file selecthanges
@@ -325,7 +300,11 @@ function updateProgressBar(str, progress, transferRate) {
 
     progressText.textContent = `${str}: ${progress}% (${transferRate} KB/s)`;
 
-    chunkSize = transferRate * Math.floor(1024 / UPS);
+    if (shouldChangeChunkSize) {
+        chunkSize = transferRate * Math.floor(1024 / UPS);
+    }
+
+
 
 }
 // function updateProgressBar(str, progress) {
@@ -376,7 +355,7 @@ function handleSignal(data) {
             const dataTransfer = new DataTransfer();
             fileInput.files = dataTransfer.files;
             fileListContainer.style.display = 'none';
-            chunkSize = 1024 * 16;
+            chunkSize = initChunkSize;
         }
     }
 }
@@ -476,8 +455,8 @@ function handleFileData(data) {
 
     fileTransferInfo.totalSize += fileData.byteLength;
 
-    
-    
+
+
 
     const totalSize = data.totalSize;
     const receivedSize = fileTransferInfo.totalSize;
@@ -496,22 +475,11 @@ function handleFileData(data) {
         const transferRate = calculateTransferRate(totalSize, timeDiff);
         appendLog(`File transfer completed in ${timeDiff / 1000} seconds. Transfer rate: ${transferRate} KB/s`);
         appendLog("Joining...");
-        
+
         setTimeout(() => {
             downloadBlob(fileName, fileTransferInfo.blob);
 
             receivedFileData.delete(fileTransferId);
-
-            // const completeFile = new Uint8Array(totalSize);
-            // const chunksArray = fileTransferInfo.chunks;
-
-            // chunksArray.forEach((data) => {
-            //     completeFile.set(new Uint8Array(data.chunk), data.offset);
-            // });
-
-            // downloadFile(fileName, completeFile);
-
-            // receivedFileData.delete(fileTransferId);
 
             hideProgressContainer();
             isFileBeingTransfered = false;
