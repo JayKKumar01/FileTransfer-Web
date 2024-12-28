@@ -453,7 +453,7 @@ async function zipAndDownload() {
         // Create a link to download the file
         const link = document.createElement('a');
         link.href = URL.createObjectURL(zipBlob);
-        link.download = `${peerBranch}${Date.now()}.zip`;
+        link.download = `${prefix}${Date.now()}.zip`;
 
         link.click();
 
