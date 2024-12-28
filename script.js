@@ -152,14 +152,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function showWaitingWindow() {
-    toggleContainers(waitContainer,[controlContainer]);
+    toggleContainers(waitContainer, [controlContainer]);
 }
 
 function showControlContainer() {
-    toggleContainers(controlContainer,[roomContainer]);
+    toggleContainers(controlContainer, [roomContainer]);
 }
 function showRoomContainer() {
-    toggleContainers(roomContainer,[controlContainer]);
+    toggleContainers(roomContainer, [controlContainer]);
 }
 
 function handleDisconnect() {
@@ -318,6 +318,11 @@ function handleSignal(data) {
             fileInput.files = dataTransfer.files;
             fileListContainer.style.display = 'none';
             chunkSize = initChunkSize;
+
+            setTimeout(() => {
+                //zipAndDownload();
+            }, 0);
+
         }
     }
 }
@@ -398,6 +403,24 @@ function updateSender(id, progress, transferRate) {
         transferRate: transferRate
     });
 }
+// Add a map to store the blobs of completed files
+// let completedFiles = new Map();
+
+// // Add JSZip object for zipping
+// let jsZip = new JSZip();
+
+// Function to zip all files and trigger download
+// function zipAndDownload() {
+//     jsZip.generateAsync({ type: "blob" }).then((zipContent) => {
+//         const zipBlob = new Blob([zipContent], { type: "application/zip" });
+//         const link = document.createElement('a');
+//         link.href = URL.createObjectURL(zipBlob);
+//         link.download = "transferred_files.zip";
+//         link.click();
+//         link.remove();
+//         appendLog("Downloaded all files as ZIP!");
+//     });
+// }
 
 // Function to handle incoming file data from the peer
 function handleFileData(data) {
@@ -418,9 +441,6 @@ function handleFileData(data) {
     fileTransferInfo.blob = new Blob([fileTransferInfo.blob, fileData]); // Append received data to the blob
 
     fileTransferInfo.totalSize += fileData.byteLength;
-
-
-
 
     const totalSize = data.totalSize;
     const receivedSize = fileTransferInfo.totalSize;
@@ -443,6 +463,17 @@ function handleFileData(data) {
         setTimeout(() => {
             downloadBlob(fileName, fileTransferInfo.blob);
 
+            // appendLog("Zipping file...");
+            // setTimeout(() => {
+
+            //     // Add to JSZip
+            //     jsZip.file(fileName, fileTransferInfo.blob);
+
+            //     // Store completed file
+            //     completedFiles.set(fileTransferId, fileName);
+            // }, 0);
+
+
             receivedFileData.delete(fileTransferId);
 
             hideProgressContainer();
@@ -451,6 +482,7 @@ function handleFileData(data) {
         }, 0);
     }
 }
+
 
 
 function getLocation(findPeerVal) {
