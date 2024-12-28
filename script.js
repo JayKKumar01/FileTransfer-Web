@@ -30,11 +30,11 @@ const prefix = "JayKKumar01-File-Transfer-";
 
 // Function to get today's date in a unique format (e.g., YYYYMMDD)
 function getTodayDate() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-  const day = String(today.getDate()).padStart(2, "0");
-  return `${year}${month}${day}`;
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}${month}${day}`;
 }
 
 // // Generate the unique peer ID
@@ -139,29 +139,27 @@ function appendLog(log) {
 
 // Function to display the file transfer window
 
+function toggleContainers(visibleContainer, hiddenContainers) {
+    visibleContainer.style.display = 'block';
+    hiddenContainers.forEach(container => {
+        container.style.display = 'none';
+    });
+}
+
+// Usage
 function showFileTransferWindow() {
-    try {
-        transferContainer.style.display = 'block';
-        roomContainer.style.display = 'none';
-        controlContainer.style.display = 'none';
-        waitContainer.style.display = 'none';
-    } catch (error) {
-        appendLog(error); // Calling appendLog with the error information
-    }
+    toggleContainers(transferContainer, [roomContainer, controlContainer, waitContainer]);
 }
 
 function showWaitingWindow() {
-    waitContainer.style.display = 'block';
-    controlContainer.style.display = 'none';
+    toggleContainers(waitContainer,[controlContainer]);
 }
 
 function showControlContainer() {
-    controlContainer.style.display = 'block';
-    roomContainer.style.display = 'none';
+    toggleContainers(controlContainer,[roomContainer]);
 }
 function showRoomContainer() {
-    controlContainer.style.display = 'none';
-    roomContainer.style.display = 'block';
+    toggleContainers(roomContainer,[controlContainer]);
 }
 
 function handleDisconnect() {
