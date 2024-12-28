@@ -243,7 +243,7 @@ function handleData(data) {
         showProgressContainer("Download", data.fileName, data.indexInfo);
         isFileBeingTransfered = true;
         isMultipleFiles = data.fileCount > 1;
-        
+
     } else if (data.type === 'signal') {
         // Handle signaling data
         setTimeout(() => handleSignal(data), 0);
@@ -280,7 +280,7 @@ async function addToZip(fileName, fileTransferId, fileTransferInfo, isLastFile) 
 }
 
 
-async function downloadBlob(fileName, fileTransferId,fileTransferInfo){
+async function downloadBlob(fileName, fileTransferId, fileTransferInfo) {
     const link = document.createElement('a');
     link.href = URL.createObjectURL(fileTransferInfo.blob);
     link.download = fileName;
@@ -453,7 +453,8 @@ async function zipAndDownload() {
         // Create a link to download the file
         const link = document.createElement('a');
         link.href = URL.createObjectURL(zipBlob);
-        link.download = peerBranch+'.zip';
+        link.download = `${peerBranch}${Date.now()}.zip`;
+
         link.click();
 
         // Clean up
@@ -512,10 +513,10 @@ function handleFileData(data) {
         appendLog(`File transfer completed in ${timeDiff / 1000} seconds. Transfer rate: ${transferRate} KB/s`);
 
         setTimeout(() => {
-            if(isZipSelected && isMultipleFiles){
+            if (isZipSelected && isMultipleFiles) {
                 addToZip(fileName, fileTransferId, fileTransferInfo, isLastFile);
-            }else{
-                downloadBlob(fileName, fileTransferId,fileTransferInfo);
+            } else {
+                downloadBlob(fileName, fileTransferId, fileTransferInfo);
             }
 
             hideProgressContainer();
