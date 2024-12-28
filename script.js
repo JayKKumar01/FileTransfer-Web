@@ -30,11 +30,15 @@ const initChunkSize = 1024 * 1024; // Initial chunk size for file transfer
 let chunkSize = initChunkSize;
 let shouldChangeChunkSize = false;
 let UPS = 4;
+let isZipSelected = true;
+let isMultipleFiles = false;
 
 const peerBranch = `${prefix}${getTodayDate()}-`;
 const randomId = Math.floor(100000 + Math.random() * 900000);
 const peerId = `${peerBranch}${randomId}`;
 
+// // Add JSZip object for zipping
+let jsZip = new JSZip();
 let peer = new Peer(peerId);
 let conn;
 let isFileBeingTransfered = false;
@@ -57,6 +61,7 @@ const progressBar = document.getElementById('progress-bar');
 const progressText = document.getElementById('progress-text');
 
 // SECTION 3: Utility Functions
+
 function getTodayDate() {
     const today = new Date();
     const year = today.getFullYear();
@@ -149,6 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.addEventListener('change', handleFileSelection);
     var ListContainer = document.getElementById('fileList');
     ListContainer.addEventListener('click', handleFileListClick);
+
+    document.getElementById('zipToggle').addEventListener('change', function () {
+        isZipSelected = this.checked; // true if checked, false otherwise
+        appendLog(`Zip download is ${isZipSelected ? 'enabled' : 'disabled'}`);
+        // You can use this state when determining whether to zip files
+    });
 });
 
 function showWaitingWindow() {
@@ -231,9 +242,13 @@ function handleData(data) {
         // Handle signal indicating readiness for file transfer
         showProgressContainer("Download", data.fileName, data.indexInfo);
         isFileBeingTransfered = true;
+        isMultipleFiles = data.fileCount > 1;
+        
     } else if (data.type === 'signal') {
         // Handle signaling data
         setTimeout(() => handleSignal(data), 0);
+    } else if (data.type === 'transfer_complete') {
+
     }
 }
 
@@ -249,14 +264,30 @@ function downloadFile(fileName, fileData) {
     link.remove();
 }
 
-function downloadBlob(fileName, blob) {
+async function addToZip(fileName, fileTransferId, fileTransferInfo, isLastFile) {
+    try {
+        jsZip.file(fileName, fileTransferInfo.blob);
+        appendLog(`${fileName} successfully added to the zip.`);
+        fileTransferInfo.blob = null;
+        receivedFileData.delete(fileTransferId);
+        if (isLastFile) {
+            zipAndDownload();
+        }
+    } catch (error) {
+        appendLog(`Error while zipping ${fileName}: ${error.message}`);
+        console.error(`Error adding ${fileName} to zip:`, error);
+    }
+}
+
+
+async function downloadBlob(fileName, fileTransferId,fileTransferInfo){
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
+    link.href = URL.createObjectURL(fileTransferInfo.blob);
     link.download = fileName;
     link.click();
     link.remove();
-
-    // URL.revokeObjectURL(link.href);
+    fileTransferInfo.blob = null;
+    receivedFileData.delete(fileTransferId);
 }
 
 // Function to generate a random ID for file transfer
@@ -319,9 +350,7 @@ function handleSignal(data) {
             fileListContainer.style.display = 'none';
             chunkSize = initChunkSize;
 
-            setTimeout(() => {
-                //zipAndDownload();
-            }, 0);
+            conn.send({ type: 'transfer_complete', message: 'All files have been successfully transferred!' });
 
         }
     }
@@ -354,8 +383,11 @@ function sendFiles(index) {
     const indexInfo = `(${index + 1}/${fileInput.files.length})`;
 
     showProgressContainer("Upload", file.name, indexInfo);
+    const fileCount = fileInput.files.length;
+    const isLastFile = index === fileCount - 1;
 
-    conn.send({ type: 'ready', fileName: file.name, indexInfo: indexInfo });
+    conn.send({ type: 'ready', fileName: file.name, indexInfo: indexInfo, isLastFile: isLastFile, fileCount: fileCount });
+
 
     const reader = new FileReader();
 
@@ -368,7 +400,8 @@ function sendFiles(index) {
             offset: 0,
             fileName: file.name,
             fileSize: file.size,
-            lastChunk: 0
+            lastChunk: 0,
+            isLastFile: isLastFile
         };
         receivedFileData.set(fileTransferId, fileMap);
         setTimeout(() => sendChunk(fileMap), 0);
@@ -389,7 +422,8 @@ function sendChunk(fileMap) {
         data: chunk,
         name: fileMap.fileName,
         offset: offset,
-        totalSize: fileMap.fileSize
+        totalSize: fileMap.fileSize,
+        isLastFile: fileMap.isLastFile
     });
     fileMap.offset += chunk.byteLength;
 }
@@ -406,21 +440,32 @@ function updateSender(id, progress, transferRate) {
 // Add a map to store the blobs of completed files
 // let completedFiles = new Map();
 
-// // Add JSZip object for zipping
-// let jsZip = new JSZip();
+
 
 // Function to zip all files and trigger download
-// function zipAndDownload() {
-//     jsZip.generateAsync({ type: "blob" }).then((zipContent) => {
-//         const zipBlob = new Blob([zipContent], { type: "application/zip" });
-//         const link = document.createElement('a');
-//         link.href = URL.createObjectURL(zipBlob);
-//         link.download = "transferred_files.zip";
-//         link.click();
-//         link.remove();
-//         appendLog("Downloaded all files as ZIP!");
-//     });
-// }
+async function zipAndDownload() {
+    try {
+        // Generate zip file
+        appendLog("Generating zip file to download...");
+        const zipBlob = await jsZip.generateAsync({ type: 'blob' });
+        appendLog("ZIP file generated successfully.");
+
+        // Create a link to download the file
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        link.download = peerBranch+'.zip';
+        link.click();
+
+        // Clean up
+        URL.revokeObjectURL(link.href);
+        appendLog("Downloaded all files as ZIP!");
+        jsZip = new JSZip();
+    } catch (error) {
+        appendLog(`Error during zip generation: ${error.message}`);
+        console.error("Error generating zip:", error);
+    }
+}
+
 
 // Function to handle incoming file data from the peer
 function handleFileData(data) {
@@ -428,15 +473,22 @@ function handleFileData(data) {
     const fileData = data.data;
     const offset = data.offset;
     const fileTransferId = data.id;
+    const isLastFile = data.isLastFile;
 
-    // if (!receivedFileData.has(fileTransferId)) {
-    //     receivedFileData.set(fileTransferId, { chunks: [], totalSize: 0 });
-    // }
+
     if (!receivedFileData.has(fileTransferId)) {
         receivedFileData.set(fileTransferId, { blob: new Blob(), totalSize: 0 });
     }
+    // if (!receivedFileData.has(fileTransferId)) {
+    //     receivedFileData.set(fileTransferId, { chunks: [], totalSize: 0 });
+    // }
+
 
     const fileTransferInfo = receivedFileData.get(fileTransferId);
+
+    // fileTransferInfo.chunks.push(fileData); // Store chunks
+    // fileTransferInfo.totalSize += fileData.byteLength;
+
     // fileTransferInfo.chunks[fileTransferInfo.chunks.length] = { chunk: fileData, offset: offset };
     fileTransferInfo.blob = new Blob([fileTransferInfo.blob, fileData]); // Append received data to the blob
 
@@ -458,23 +510,13 @@ function handleFileData(data) {
         const timeDiff = new Date() - time;
         const transferRate = calculateTransferRate(totalSize, timeDiff);
         appendLog(`File transfer completed in ${timeDiff / 1000} seconds. Transfer rate: ${transferRate} KB/s`);
-        appendLog("Joining...");
 
         setTimeout(() => {
-            downloadBlob(fileName, fileTransferInfo.blob);
-
-            // appendLog("Zipping file...");
-            // setTimeout(() => {
-
-            //     // Add to JSZip
-            //     jsZip.file(fileName, fileTransferInfo.blob);
-
-            //     // Store completed file
-            //     completedFiles.set(fileTransferId, fileName);
-            // }, 0);
-
-
-            receivedFileData.delete(fileTransferId);
+            if(isZipSelected && isMultipleFiles){
+                addToZip(fileName, fileTransferId, fileTransferInfo, isLastFile);
+            }else{
+                downloadBlob(fileName, fileTransferId,fileTransferInfo);
+            }
 
             hideProgressContainer();
             isFileBeingTransfered = false;

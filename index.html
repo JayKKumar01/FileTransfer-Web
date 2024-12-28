@@ -9,9 +9,18 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="/manifest.json">
     <script src="peer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 
 <body>
+    <div id="zipToggleContainer">
+        <label class="toggle">
+            <input type="checkbox" id="zipToggle" checked>
+            <span class="slider"></span>
+        </label>
+        <span id="zipToggleLabel">Zip Download</span>
+    </div>
+    
     <div class="location-button" onclick="logTime()">Get Time</div>
     <div id="main-container">
         <div id="room-container">
@@ -82,7 +91,7 @@
     </div>
 
     <script src="script.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
 
 </body>
 
