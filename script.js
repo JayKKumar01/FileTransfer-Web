@@ -41,9 +41,9 @@ function getTodayDate() {
 const peerBranch = `${prefix}${getTodayDate()}-`;
 
 // Size of each file transfer chunk
-const initChunkSize = 1024 * 16;
+const initChunkSize = 1024 * 1024;
 let chunkSize = initChunkSize;
-let shouldChangeChunkSize = true;
+let shouldChangeChunkSize = false;
 let UPS = 4;
 
 
