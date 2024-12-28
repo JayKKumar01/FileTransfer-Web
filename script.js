@@ -44,7 +44,7 @@ const peerBranch = `${prefix}${getTodayDate()}-`;
 const initChunkSize = 1024 * 16;
 let chunkSize = initChunkSize;
 let shouldChangeChunkSize = true;
-let UPS = 2;
+let UPS = 4;
 
 
 function updateUPS() {
