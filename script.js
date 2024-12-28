@@ -2,7 +2,7 @@
 const peerBranch = "JayKKumar01-";
 
 // Size of each file transfer chunk
-let chunkSize = 1024 * 16;
+let chunkSize = 1024 * 256;
 let UPS = 4;
 
 // function updateChunkSize() {
