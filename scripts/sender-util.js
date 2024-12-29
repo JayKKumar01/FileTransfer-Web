@@ -66,42 +66,49 @@ function sendFiles(index) {
     showProgressContainer('Upload', file.name, indexInfo);
     time = new Date();
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const fileData = event.target.result;
-        const fileMap = {
-            index,
-            fileTransferId,
-            fileData,
-            offset: 0,
-            fileName: file.name,
-            fileSize: file.size,
-            isLastFile
-        };
-
-        sentFileData.set(fileTransferId, fileMap);
-        processNextChunk(fileMap);
+    const fileMap = {
+        index,
+        fileTransferId,
+        file,
+        offset: 0,
+        fileName: file.name,
+        fileSize: file.size,
+        isLastFile
     };
 
-    reader.readAsArrayBuffer(file);
+    sentFileData.set(fileTransferId, fileMap);
+    processNextChunk(fileMap);
 }
 
 function processNextChunk(fileMap) {
-    if (fileMap.offset >= fileMap.fileSize) return; // Avoid redundant sends
+    const { file, offset, fileSize } = fileMap;
 
-    const chunk = fileMap.fileData.slice(fileMap.offset, fileMap.offset + chunkSize);
+    if (offset >= fileSize) return; // Avoid redundant sends
 
-    conn.send({
-        type: 'file',
-        id: fileMap.fileTransferId,
-        data: chunk,
-        name: fileMap.fileName,
-        offset: fileMap.offset,
-        totalSize: fileMap.fileSize,
-        isLastFile: fileMap.isLastFile
-    });
+    const chunk = file.slice(offset, offset + chunkSize);
+    const reader = new FileReader();
 
-    fileMap.offset += chunk.byteLength;
+    reader.onload = (event) => {
+        const chunkData = event.target.result;
+
+        conn.send({
+            type: 'file',
+            id: fileMap.fileTransferId,
+            data: chunkData,
+            name: fileMap.fileName,
+            offset: fileMap.offset,
+            totalSize: fileMap.fileSize,
+            isLastFile: fileMap.isLastFile
+        });
+
+        fileMap.offset += chunkData.byteLength; // Update offset
+    };
+
+    reader.onerror = (error) => {
+        console.error('Error reading file chunk:', error);
+    };
+
+    reader.readAsArrayBuffer(chunk); // Read the next chunk
 }
 
 // Adjust chunk size based on the transfer rate in KB/s
