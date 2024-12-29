@@ -26,8 +26,8 @@
 
             <!-- Message input and connect button -->
             <input type="text" id="targetPeerId" placeholder="Enter target peer ID">
-            <button id="connectButton" onclick="connect()">Connect</button>
-            <div id="tryNearbySearch" onclick="showControlContainer()">
+            <button id="connectButton">Connect</button>
+            <div id="tryNearbySearch" onclick="">
                 <span id="search_icon"></span>
                 <div id="search_text">Try Nearby Search</div>
             </div>
@@ -43,7 +43,7 @@
             <!-- File transfer content goes here -->
             <!-- For example, you can add file input and send button -->
             <input type="file" id="fileInput" multiple>
-            <button id="sendButton" onclick="sendFile()">Send File</button>
+            <button id="sendButton">Send File</button>
         </div>
         <div id="progress-container">
             <!-- Current File name goes here -->
@@ -60,21 +60,14 @@
     <div id="logs-container">
         <textarea id="logs" readonly></textarea>
     </div>
-    <div id="chunk-size-dropdown" hidden>
-        <label for="chunkSizeSelect">UPS:</label>
-        <select id="chunkSizeSelect" onchange="updateUPS()">
-            <script>
-                for (let i = 0; i < 10; i++) {
-                
-                    const value = (i + 1);
-                    const isDefault = value === 4;
-                    document.write(`<option value="${value}"${isDefault ? ' selected' : ''}>${value}</option>`);
-                }
-            </script>
-        </select>
-    </div>
 
-    <script src="script.js"></script>
+    <script src="scripts/helper.js"></script>
+    <script type="module" src="scripts/peer-util.js"></script>
+    <script type="module" src="scripts/file-input-util.js"></script>
+    <script type="module" src="scripts/zip-util.js"></script>
+    <script type="module" src="scripts/sender-util.js"></script>
+    <script type="module" src="scripts/receiver-util.js"></script>
+
     
 
 </body>
