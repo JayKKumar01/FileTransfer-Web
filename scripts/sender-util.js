@@ -19,7 +19,7 @@ const sentFileData = new Map(); // Use Map for better structure
 const INIT_CHUNK_SIZE = 1024 * 1024; // Initial chunk size for file transfer
 let chunkSize = INIT_CHUNK_SIZE; // Dynamic chunk size
 let conn;
-let time, transferTime;
+let time;
 
 function setTransferStatus(status){
     isFileBeingTransferred = status;
@@ -50,14 +50,15 @@ function sendFiles(index) {
 
     showProgressContainer('Upload', file.name, indexInfo);
     time = new Date();
-    transferTime = time;
     const fileCount = FILE_INPUT.files.length;
     const isLastFile = index === fileCount - 1;
+    const isFirstFile = index === 0;
 
     conn.send({
         type: 'ready',
         fileName: file.name,
         indexInfo: indexInfo,
+        isFirstFile: isFirstFile,
         isLastFile: isLastFile,
         fileCount: fileCount
     });

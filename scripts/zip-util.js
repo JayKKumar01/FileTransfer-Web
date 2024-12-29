@@ -15,7 +15,11 @@ export function getIsZipSelected(){
     return isZipSelected;
 }
 
-let jsZip = new JSZip();
+let jsZip;
+
+export function resetZip(){
+    jsZip = new JSZip();
+}
 
 export async function addToZip(fileName, blob, isLastFile) {
     try {

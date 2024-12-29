@@ -6,7 +6,7 @@ import {
     updateProgressBar,
     showProgressContainer,
 } from './utils.js';
-import { getIsZipSelected, addToZip } from './zip-util.js';
+import { getIsZipSelected, resetZip, addToZip } from './zip-util.js';
 
 let isMultipleFiles;
 let time;
@@ -22,6 +22,9 @@ export function ready(data) {
     time = new Date();
     transferTime = time;
     isMultipleFiles = data.fileCount > 1;
+    if(data.isFirstFile){
+        resetZip();
+    }
 }
 
 export function handleFileData(data) {
