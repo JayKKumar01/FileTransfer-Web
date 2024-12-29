@@ -21,7 +21,6 @@
         <span id="zipToggleLabel">Zip Download</span>
     </div>
     
-    <div class="location-button" onclick="logTime()">Get Time</div>
     <div id="main-container">
         <div id="room-container">
 
@@ -33,16 +32,6 @@
                 <div id="search_text">Try Nearby Search</div>
             </div>
 
-        </div>
-
-        <div id="control-container">
-            <button id="host-button" onclick="getLocation(false)">HOST</button>
-            <button id="find-button" onclick="getLocation(true)">FIND</button>
-            <div class="tryCode" onclick="showRoomContainer()">Try Code Search</div>
-
-        </div>
-        <div id="wait-container">
-            <span>waiting for peer...</span>
         </div>
 
         <div id="transfer-container">
@@ -81,11 +70,6 @@
                     const isDefault = value === 4;
                     document.write(`<option value="${value}"${isDefault ? ' selected' : ''}>${value}</option>`);
                 }
-
-                // for (let i = 0, size = 64; i < 10; i++, size *= 2) {
-                //     const isDefault = size === 256;
-                //     document.write(`<option value="${size * 1024}"${isDefault ? ' selected' : ''}>${size} KB</option>`);
-                // }
             </script>
         </select>
     </div>

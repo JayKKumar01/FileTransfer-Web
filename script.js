@@ -51,8 +51,6 @@ const sendFileData = new Map();
 const logsTextarea = document.getElementById('logs');
 const transferContainer = document.getElementById('transfer-container');
 const roomContainer = document.getElementById('room-container');
-const controlContainer = document.getElementById('control-container');
-const waitContainer = document.getElementById("wait-container");
 const fileInput = document.getElementById('fileInput');
 const fileListContainer = document.getElementById('fileListContainer');
 const progressContainer = document.getElementById('progress-container');
@@ -121,7 +119,7 @@ function setupConnection(connection) {
     conn.on('open', () => {
         const remoteId = conn.peer.replace(peerBranch, '');
         appendLog(`Connected to ${remoteId}`);
-        toggleContainers(transferContainer, [roomContainer, controlContainer, waitContainer]);
+        toggleContainers(transferContainer, [roomContainer]);
     });
 
     conn.on('data', handleData);
@@ -144,10 +142,6 @@ handlePeer();
 // need to organize code after this line... pending
 
 
-
-let setLocation = false;
-let findPeer = false;
-
 // Wait for the DOM content to be fully loaded before executing script
 document.addEventListener('DOMContentLoaded', () => {
     // Event listeners for file input and file list
@@ -161,17 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // You can use this state when determining whether to zip files
     });
 });
-
-function showWaitingWindow() {
-    toggleContainers(waitContainer, [controlContainer]);
-}
-
-function showControlContainer() {
-    toggleContainers(controlContainer, [roomContainer]);
-}
-function showRoomContainer() {
-    toggleContainers(roomContainer, [controlContainer]);
-}
 
 function handleDisconnect() {
     appendLog('Disconnected from peer.');
@@ -252,18 +235,6 @@ function handleData(data) {
     }
 }
 
-
-
-// Function to trigger file download
-function downloadFile(fileName, fileData) {
-    const blob = new Blob([fileData], { type: 'application/octet-stream' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
-    link.remove();
-}
-
 async function addToZip(fileName, fileTransferId, fileTransferInfo, isLastFile) {
     try {
         jsZip.file(fileName, fileTransferInfo.blob);
@@ -306,13 +277,6 @@ function showProgressContainer(str, fileName, index) {
     time = new Date();
     transferTime = time;
 }
-
-
-// function updateProgressBar(str, progress) {
-//     progressBar.style.width = `${progress}%`;
-//     progressText.textContent = `${str}: ${progress}%`;
-// }
-
 
 
 // Function to handle signaling data
@@ -437,10 +401,6 @@ function updateSender(id, progress, transferRate) {
         transferRate: transferRate
     });
 }
-// Add a map to store the blobs of completed files
-// let completedFiles = new Map();
-
-
 
 // Function to zip all files and trigger download
 async function zipAndDownload() {
@@ -524,131 +484,4 @@ function handleFileData(data) {
             appendLog("Done!");
         }, 0);
     }
-}
-
-
-
-function getLocation(findPeerVal) {
-    findPeer = findPeerVal;
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition, showError, {
-            timeout: 60000,
-            enableHighAccuracy: true,
-            maximumAge: 0
-        });
-    } else {
-        appendLog("Geolocation is not supported by this browser.");
-    }
-}
-
-function showError(error) {
-    switch (error.code) {
-        case error.PERMISSION_DENIED:
-            appendLog("User denied the request for Geolocation.");
-            break;
-        case error.POSITION_UNAVAILABLE:
-            appendLog("Location information is unavailable.");
-            break;
-        case error.TIMEOUT:
-            appendLog("The request to get user location timed out.");
-            break;
-        case error.UNKNOWN_ERROR:
-            appendLog("An unknown error occurred.");
-            break;
-    }
-}
-
-function showPosition(position) {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-
-    const time = getUnixTimeSync();
-    // const time = 1000000;
-    const location = generateLocationNumber(latitude, longitude);
-
-    const id = timestampToDateString(time) + "_" + location;
-    // const id = location;
-    if (!findPeer) {
-        host(id);
-        showWaitingWindow();
-        appendLog(`Host ID: ${id}`);
-    } else {
-        find(id, time, location);
-        showWaitingWindow();
-    }
-
-}
-
-
-function generateLocationNumber(latitude, longitude) {
-    const decimalPlaces = 4;
-
-    let a = latitude.toFixed(decimalPlaces).split('.');
-    let b = longitude.toFixed(decimalPlaces).split('.');
-
-    return `${a[0]}_${b[0]}_${b[1]}_${a[1]}`;
-}
-
-function host(peerId) {
-    peer.destroy();
-    peer = new Peer(`${peerBranch}${peerId}`);
-    handlePeer();
-}
-
-function find(id, time, location) {
-    targetPeerIdInput.value = id;
-    appendLog("Connecting to " + targetPeerIdInput.value);
-    connect();
-    targetPeerIdInput.value = timestampToDateString(time - 60) + "_" + location;
-    connect();
-    appendLog("Connecting to " + targetPeerIdInput.value);
-}
-
-
-
-
-function getUnixTimeSync() {
-    const apiUrl = "https://worldtimeapi.org/api/timezone/Asia/Kolkata";
-
-
-
-    // Create a synchronous XMLHttpRequest
-    const request = new XMLHttpRequest();
-    request.open("GET", apiUrl, false); // Make the request synchronous
-    request.send();
-
-
-
-    if (request.status === 200) {
-        const data = JSON.parse(request.responseText);
-        const unixTime = data.unixtime;
-        return unixTime;
-    } else {
-        const errorMessage = `HTTP error! Status: ${request.status}`;
-        appendLog(errorMessage);
-        return 1000000;
-    }
-}
-
-function timestampToDateString(timestamp) {
-
-    const date = new Date(timestamp * 1000);
-
-    const seconds = date.getSeconds();
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    const dateString = `${year}-${month}-${day}_${hours}_${minutes}`;
-    return dateString;
-}
-
-
-function logTime() {
-    const unixTime = getUnixTimeSync();
-    appendLog("Date: " + timestampToDateString(unixTime));
-    appendLog("Date: " + timestampToDateString(unixTime - 60));
 }
