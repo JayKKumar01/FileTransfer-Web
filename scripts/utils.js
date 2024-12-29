@@ -25,6 +25,9 @@ export function appendLog(log) {
 }
 
 export function calculateTransferRate(fileSize, timeDiff) {
+    if(timeDiff === 0){
+        return 0;
+    }
     return ((fileSize / 1024) / (timeDiff / 1000)).toFixed(2);
 }
 

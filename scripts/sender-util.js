@@ -15,7 +15,7 @@ import {
 } from './utils.js';
 
 let isFileBeingTransferred = false;
-const receivedFileData = new Map(); // Use Map for better structure
+const sentFileData = new Map(); // Use Map for better structure
 const INIT_CHUNK_SIZE = 1024 * 1024; // Initial chunk size for file transfer
 let chunkSize = INIT_CHUNK_SIZE; // Dynamic chunk size
 let conn;
@@ -75,7 +75,7 @@ function sendFiles(index) {
             fileSize: file.size,
             isLastFile: isLastFile
         };
-        receivedFileData.set(fileTransferId, fileMap);
+        sentFileData.set(fileTransferId, fileMap);
         setTimeout(() => sendChunk(fileMap), 0);
     };
 
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Function to handle signaling data
 export function handleSignal(data) {
     // changeChunkSize(data.sendTime);
-    const fileMap = receivedFileData.get(data.id);
+    const fileMap = sentFileData.get(data.id);
 
     updateProgressBar("Upload", data.progress, data.transferRate);
     // updateProgressBar("Upload", data.progress);
@@ -118,7 +118,7 @@ export function handleSignal(data) {
         // File transfer completed
         setTransferStatus(false);
         const index = fileMap.index;
-        // sendFileData.delete(data.id);
+        sentFileData.delete(data.id);
 
         const timeDiff = new Date() - time;
         const transferRate = calculateTransferRate(fileMap.fileSize, timeDiff);
@@ -126,7 +126,7 @@ export function handleSignal(data) {
 
         if (index + 1 < FILE_INPUT.files.length) {
             // Send the next file if available
-            setTimeout(() => sendFiles(index + 1), 1000);
+            setTimeout(() => sendFiles(index + 1), 0);
         } else {
             // Hide progress container and reset file input
             hideProgressContainer();
