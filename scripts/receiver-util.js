@@ -1,20 +1,18 @@
-import { PREFIX } from './constants.js';
 import { getConnection } from './peer-util.js';
 import {
     appendLog,
     calculateTransferRate,
     hideProgressContainer,
     updateProgressBar,
-    generateFileTransferId,
     showProgressContainer,
 } from './utils.js';
-import { getIsZipSelected } from './zip-util.js';
+import { getIsZipSelected, addToZip } from './zip-util.js';
 
 let isMultipleFiles;
 let time;
 let transferTime;
 let conn;
-let jsZip = new JSZip();
+
 
 const receivedFileData = new Map();
 
@@ -97,18 +95,7 @@ async function finalizeFileHandling(fileName, fileTransferId, fileTransferInfo, 
     }
 }
 
-async function addToZip(fileName, blob, isLastFile) {
-    try {
-        jsZip.file(fileName, blob);
-        appendLog(`${fileName} successfully added to the zip.`);
-        if (isLastFile) {
-            zipAndDownload();
-        }
-    } catch (error) {
-        appendLog(`Error while zipping ${fileName}: ${error.message}`);
-        console.error(`Error adding ${fileName} to zip:`, error);
-    }
-}
+
 
 function downloadBlob(fileName, blob) {
     const link = document.createElement('a');
@@ -118,23 +105,4 @@ function downloadBlob(fileName, blob) {
     link.remove();
 }
 
-async function zipAndDownload() {
-    try {
-        appendLog("Generating zip file to download...");
-        const zipBlob = await jsZip.generateAsync({ type: 'blob' });
-        appendLog("ZIP file generated successfully.");
 
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(zipBlob);
-        link.download = `${PREFIX}${Date.now()}.zip`;
-
-        link.click();
-
-        URL.revokeObjectURL(link.href);
-        appendLog("Downloaded all files as ZIP!");
-        jsZip = new JSZip();
-    } catch (error) {
-        appendLog(`Error during zip generation: ${error.message}`);
-        console.error("Error generating zip:", error);
-    }
-}

@@ -1,6 +1,6 @@
 //zip-util.js
 // Importing necessary constants and utilities
-import { ZIP_TOGGLE} from './constants.js';
+import { PREFIX, ZIP_TOGGLE} from './constants.js';
 import { appendLog } from './utils.js';
 
 let isZipSelected = true;
@@ -13,4 +13,40 @@ ZIP_TOGGLE.addEventListener('change', function () {
 
 export function getIsZipSelected(){
     return isZipSelected;
+}
+
+let jsZip = new JSZip();
+
+export async function addToZip(fileName, blob, isLastFile) {
+    try {
+        jsZip.file(fileName, blob);
+        appendLog(`${fileName} successfully added to the zip.`);
+        if (isLastFile) {
+            zipAndDownload();
+        }
+    } catch (error) {
+        appendLog(`Error while zipping ${fileName}: ${error.message}`);
+        console.error(`Error adding ${fileName} to zip:`, error);
+    }
+}
+
+async function zipAndDownload() {
+    try {
+        appendLog("Generating zip file to download...");
+        const zipBlob = await jsZip.generateAsync({ type: 'blob' });
+        appendLog("ZIP file generated successfully.");
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        link.download = `${PREFIX}${Date.now()}.zip`;
+
+        link.click();
+
+        URL.revokeObjectURL(link.href);
+        appendLog("Downloaded all files as ZIP!");
+        jsZip = new JSZip();
+    } catch (error) {
+        appendLog(`Error during zip generation: ${error.message}`);
+        console.error("Error generating zip:", error);
+    }
 }
