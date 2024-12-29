@@ -1,4 +1,3 @@
-//sender-util.js
 import {
     FILE_INPUT,
     FILE_LIST_CONTAINER,
@@ -14,17 +13,16 @@ import {
     showProgressContainer
 } from './utils.js';
 
+const INIT_CHUNK_SIZE = 1024 * 64; // Initial chunk size: 1MB
+let chunkSize = INIT_CHUNK_SIZE;
 let isFileBeingTransferred = false;
-const sentFileData = new Map(); // Use Map for better structure
-const INIT_CHUNK_SIZE = 1024 * 1024; // Initial chunk size for file transfer
-let chunkSize = INIT_CHUNK_SIZE; // Dynamic chunk size
+const sentFileData = new Map(); // Tracks all files being sent
 let conn;
 let time;
 
-function setTransferStatus(status){
+function setTransferStatus(status) {
     isFileBeingTransferred = status;
 }
-
 
 function sendFile() {
     if (isFileBeingTransferred) {
@@ -33,111 +31,143 @@ function sendFile() {
     }
 
     if (FILE_INPUT.files.length > 0) {
-        // Start sending files if files are selected
-        setTransferStatus(true);
         conn = getConnection();
+        if (!conn) {
+            appendLog('No connection available. Please connect to a peer first.');
+            return;
+        }
+
+        setTransferStatus(true);
         sendFiles(0);
     } else {
         appendLog('Please select a file to send.');
     }
 }
 
-// Function to send multiple files to the peer
 function sendFiles(index) {
-    const file = FILE_INPUT.files[index];
+    const files = FILE_INPUT.files;
+    if (!files[index]) return;
+
+    const file = files[index];
     const fileTransferId = generateFileTransferId();
-    const indexInfo = `(${index + 1}/${FILE_INPUT.files.length})`;
+    const indexInfo = `(${index + 1}/${files.length})`;
+    const isLastFile = index === files.length - 1;
 
-    showProgressContainer('Upload', file.name, indexInfo);
-    time = new Date();
-    const fileCount = FILE_INPUT.files.length;
-    const isLastFile = index === fileCount - 1;
-    const isFirstFile = index === 0;
-
+    // Notify peer of the upcoming transfer
     conn.send({
         type: 'ready',
         fileName: file.name,
-        indexInfo: indexInfo,
-        isFirstFile: isFirstFile,
-        isLastFile: isLastFile,
-        fileCount: fileCount
+        indexInfo,
+        isFirstFile: index === 0,
+        isLastFile,
+        fileCount: files.length
     });
 
-    const reader = new FileReader();
+    showProgressContainer('Upload', file.name, indexInfo);
+    time = new Date();
 
-    reader.onload = function (event) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
         const fileData = event.target.result;
         const fileMap = {
-            index: index,
-            fileTransferId: fileTransferId,
-            fileData: fileData,
+            index,
+            fileTransferId,
+            fileData,
             offset: 0,
             fileName: file.name,
             fileSize: file.size,
-            isLastFile: isLastFile
+            isLastFile
         };
+
         sentFileData.set(fileTransferId, fileMap);
-        setTimeout(() => sendChunk(fileMap), 0);
+        processNextChunk(fileMap);
     };
 
     reader.readAsArrayBuffer(file);
 }
 
-// Function to send file chunks to the peer
-function sendChunk(fileMap) {
-    const offset = fileMap.offset;
-    const chunk = fileMap.fileData.slice(offset, offset + chunkSize);
+function processNextChunk(fileMap) {
+    if (fileMap.offset >= fileMap.fileSize) return; // Avoid redundant sends
+
+    const chunk = fileMap.fileData.slice(fileMap.offset, fileMap.offset + chunkSize);
+
     conn.send({
         type: 'file',
         id: fileMap.fileTransferId,
         data: chunk,
         name: fileMap.fileName,
-        offset: offset,
+        offset: fileMap.offset,
         totalSize: fileMap.fileSize,
         isLastFile: fileMap.isLastFile
     });
+
     fileMap.offset += chunk.byteLength;
 }
 
-// Add event listener on DOM content loaded
+// Adjust chunk size based on the transfer rate in KB/s
+function adjustChunkSize(transferRate) {
+    const MIN_CHUNK_SIZE = 1024 * 64;  // Minimum chunk size: 64KB (in bytes)
+    const MAX_CHUNK_SIZE = 1024 * 1024; // Maximum chunk size: 1MB (in bytes)
+
+    // Calculate chunk size based on transfer rate (in KB/s), multiply by 1024 to convert to bytes
+    const calculatedChunkSize = Math.floor((transferRate * 1024) / 3);
+
+    // Set the chunk size, constrained by the MIN and MAX values (in bytes)
+    chunkSize = Math.max(MIN_CHUNK_SIZE, Math.min(calculatedChunkSize, MAX_CHUNK_SIZE));
+
+    // Optional logging to keep track of chunk size changes (for debugging purposes)
+    console.log(`Dynamic Chunk Size Adjusted: ${chunkSize / 1024} KB at Transfer Rate: ${transferRate} KB/s`);
+}
+
+export function handleSignal(data) {
+    const fileMap = sentFileData.get(data.id);
+    if (!fileMap) {
+        appendLog('Unexpected file transfer ID in signal.');
+        return;
+    }
+
+    // Update progress
+    updateProgressBar('Upload', data.progress, data.transferRate);
+
+    // Adjust chunk size based on the received transfer rate in KB/s
+    adjustChunkSize(data.transferRate);
+
+    if (fileMap.offset < fileMap.fileSize) {
+        // Continue transfer
+        processNextChunk(fileMap);
+    } else {
+        // Completed transfer for this file
+        finalizeTransfer(fileMap, data.id);
+    }
+}
+
+function finalizeTransfer(fileMap, id) {
+    setTransferStatus(false);
+    const timeDiff = new Date() - time;
+    const transferRate = calculateTransferRate(fileMap.fileSize, timeDiff);
+    appendLog(`File ${fileMap.fileName} completed in ${timeDiff / 1000}s. Rate: ${transferRate} KB/s`);
+
+    const index = fileMap.index;
+    sentFileData.delete(id);
+
+    if (index + 1 < FILE_INPUT.files.length) {
+        sendFiles(index + 1); // Start next file
+    } else {
+        transferComplete();
+    }
+}
+
+function transferComplete() {
+    hideProgressContainer();
+    FILE_INPUT.files = new DataTransfer().files; // Reset file input
+    FILE_LIST_CONTAINER.style.display = 'none';
+    chunkSize = INIT_CHUNK_SIZE;
+
+    conn.send({ type: 'transfer_complete', message: 'All files successfully transferred!' });
+    appendLog('All files have been transferred!');
+}
+
+// Event listener setup
 document.addEventListener('DOMContentLoaded', () => {
     SEND_BUTTON.addEventListener('click', sendFile);
 });
-
-// Function to handle signaling data
-export function handleSignal(data) {
-    // changeChunkSize(data.sendTime);
-    const fileMap = sentFileData.get(data.id);
-
-    updateProgressBar("Upload", data.progress, data.transferRate);
-    // updateProgressBar("Upload", data.progress);
-
-    if (fileMap.offset < fileMap.fileSize) {
-        // Continue sending chunks if file transfer is incomplete
-        setTimeout(() => sendChunk(fileMap), 0);
-    } else {
-        // File transfer completed
-        setTransferStatus(false);
-        const index = fileMap.index;
-        sentFileData.delete(data.id);
-
-        const timeDiff = new Date() - time;
-        const transferRate = calculateTransferRate(fileMap.fileSize, timeDiff);
-        appendLog(`File transfer completed in ${timeDiff / 1000} seconds. Transfer rate: ${transferRate} KB/s`);
-
-        if (index + 1 < FILE_INPUT.files.length) {
-            // Send the next file if available
-            setTimeout(() => sendFiles(index + 1), 0);
-        } else {
-            // Hide progress container and reset file input
-            hideProgressContainer();
-            const dataTransfer = new DataTransfer();
-            FILE_INPUT.files = dataTransfer.files;
-            FILE_LIST_CONTAINER.style.display = 'none';
-            chunkSize = INIT_CHUNK_SIZE;
-
-            conn.send({ type: 'transfer_complete', message: 'All files have been successfully transferred!' });
-
-        }
-    }
-}
