@@ -4,113 +4,129 @@
 
 ## Overview
 
-This web application enables peer-to-peer file transfer using PeerJS and is designed to be compatible with both iOS and Android devices. Users can connect with peers, select files for transfer, and monitor the progress of uploads and downloads.
+This web application enables peer-to-peer file transfer using PeerJS and is designed to be compatible with both iOS and Android devices. This is a peer-to-peer file transfer application that enables seamless file sharing between users using a peer-to-peer connection (via PeerJS) and various helper utilities. It also supports sending multiple files, dynamically adjusting file chunk sizes based on transfer speed, and optionally compressing files into a ZIP archive before download.
 
 ## Live Demo
 
 Visit [FileTransfer Web App: (https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/)](https://jaykkumar01.github.io/FileTransfer-Web-IOS-Android/) for a live demo.
 
-## Features
+Here's a README file template for your GitHub repo, summarizing the main functions based on the eight files in your project:
 
-- **Peer Connection:**
-  - Users can establish a connection by entering their peer ID and the target peer ID.
+---
 
-- **File Selection:**
-  - Select and send multiple files to connected peers.
+## Features:
+- Peer-to-peer file sharing
+- Dynamic file chunk size adjustment based on transfer rates
+- Option to zip files before downloading
+- Supports logging of transfer events and progress
+- UI components for managing file input and transfer status
 
-- **Real-time Progress Updates:**
-  - Track file transfer progress using a progress bar and text updates.
+---
 
-- **Cross-Platform Compatibility:**
-  - Works seamlessly on both iOS and Android devices.
+## Table of Contents
+1. [Technologies](#technologies)
+2. [Main Components](#main-components)
+3. [Installation](#installation)
+4. [Usage](#usage)
+5. [Contributing](#contributing)
 
-## Functionality
+---
 
-### `connect()`
-Establishes a connection with the target peer. Users enter the target peer ID, and the connection is set up using PeerJS.
+## Technologies
 
-### `appendLog(log)`
-Logs messages to the textarea, providing feedback on various actions and events.
+- **PeerJS** for peer-to-peer communication
+- **JSZip** for zipping files before download
+- **Vanilla JavaScript**, **HTML5**, and **CSS** for frontend functionality
+- **FileReader** API for reading file chunks
+- **Progressive UI** with real-time transfer logs and progress bars
 
-### `showFileTransferWindow()`
-Displays the file transfer window upon successful connection.
+---
 
-### `setupConnection(connection)`
-Handles the setup of a peer connection when established. Invoked when a connection event is detected.
+## Main Components
 
-### `handleConnectionOpen(targetPeerId)`
-Handles actions when the connection is open, such as updating logs and showing the file transfer window.
+### 1. **peer-util.js**
+Handles the peer-to-peer connection logic using PeerJS:
+- **peer.on('open')**: Opens a connection and displays the Peer ID.
+- **peer.on('connection')**: Handles incoming connections from other peers.
+- **connect()**: Initiates a connection to a remote peer using a given Peer ID.
+- **setupConnection()**: Sets up a connection once the peer is successfully connected.
 
-### `handleFileSelection()`
-Handles changes in the file input, updating the file list container and displaying selected files.
+### 2. **sender-util.js**
+Manages the file sending process between connected peers:
+- **sendFile()**: Begins the process of sending files after verifying an active connection.
+- **sendFiles()**: Sends files to the connected peer by splitting them into chunks.
+- **processNextChunk()**: Reads and sends the next chunk of the file using `FileReader`.
+- **adjustChunkSize()**: Dynamically adjusts the chunk size based on the transfer rate, improving the efficiency of the transfer.
 
-### `handleFileListClick(event)`
-Handles click events on file list items, allowing users to remove selected files.
+### 3. **receiver-util.js**
+Handles file reception and managing the transfer's progress:
+- **ready()**: Prepares the receiver to handle the incoming files once the sender is ready.
+- **handleFileData()**: Receives file data chunks and reconstructs the file.
+- **writeToFile()**: Writes received chunks to a file.
 
-### `handleData(data)`
-Handles data received from the peer, including file data, signaling data, and readiness signals.
+### 4. **file-input-util.js**
+Manages file selection and rendering:
+- **handleFileSelection()**: Handles user file selection and displays a list of selected files in the UI.
+- **createFileListItem()**: Creates individual items in the file list for each selected file.
+- **handleFileListClick()**: Allows removal of files from the input by clicking on their respective list items.
 
-### `handleSignal(data)`
-Handles signaling data, updating the progress bar based on the signaling information.
+### 5. **helper.js**
+Handles screen locking to prevent screen sleep during transfers:
+- **keepScreenAwake()**: Requests a wake lock to prevent the screen from going to sleep, ensuring uninterrupted transfers.
 
-### `downloadFile(fileName, fileData)`
-Triggers the download of a received file, creating a downloadable link for the user.
+### 6. **utils.js**
+Utility functions to manage file transfer data, progress, and logs:
+- **appendLog()**: Appends log messages to a textarea element for displaying logs.
+- **calculateTransferRate()**: Calculates transfer rate to dynamically adjust file chunk sizes.
+- **updateProgressBar()**: Updates the UI with the current progress of the transfer.
+- **showProgressContainer()**: Displays the file transfer progress container.
+- **generateFileTransferId()**: Generates a unique ID for each file transfer.
 
-### `generateFileTransferId()`
-Generates a random ID for file transfer, ensuring uniqueness for each transfer.
+### 7. **zip-util.js**
+Handles zipping and downloading of files:
+- **addToZip()**: Adds files to the zip archive.
+- **zipAndDownload()**: Compresses files into a single ZIP file and initiates the download.
 
-### `showProgressContainer(str, fileName, index)`
-Displays the progress container during file transfer, updating the filename and progress indicators.
+### 8. **constants.js**
+Contains constants used across the application for referencing UI elements, settings, and global parameters:
+- Includes references for elements such as `FILE_LIST`, `SEND_BUTTON`, and progress containers.
 
-### `updateProgressBar(str, progress)`
-Updates the progress bar and text during file transfer, providing real-time progress updates.
+---
 
-### `hideProgressContainer()`
-Hides the progress container after a file transfer is completed.
+## Installation
 
-### `sendChunk(fileMap)`
-Sends a chunk of a file to the peer during file transfer.
+Clone the repository to your local machine:
 
-### `sendFile()`
-Initiates the file transfer process, sending selected files to the connected peer.
+```bash
+git clone https://github.com/JayKKumar01/FileTransfer-Web-IOS-Android.git
+```
 
-### `sendFiles(index)`
-Sends multiple files to the peer, handling each file's transfer sequentially.
+Ensure all required dependencies are installed (for example, you may need to install `peerjs` and `jszip` via a package manager if using Node.js):
 
-### `updateSender(id, progress)`
-Sends a progress update to the peer, allowing for synchronized progress tracking.
+```bash
+npm install peerjs jszip
+```
 
-### `handleFileData(data)`
-Handles incoming file data from the peer, aggregating chunks until the complete file is received.
+---
 
-## Getting Started
+## Usage
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/JayKKumar01/FileTransfer-Web-IOS-Android.git
-   ```
+1. **Run the app**: Open the `index.html` file in a browser.
+   
+2. **Establish a Connection**:
+   - Input the **Peer ID** from the log (e.g., `Your ID is: <randomID>`) into another peer's input field and click "Connect".
+   
+3. **Select Files to Send**:
+   - Use the file input to select files for transfer.
 
-2. **Open `index.html` in your web browser.**
+4. **Start File Transfer**:
+   - Once connected, press the "Send File" button to begin the transfer. The progress will be logged and displayed.
 
-3. **Enter your peer ID and the target peer ID to establish a connection.**
+5. **Zip Option** (Optional):
+   - Toggle the zip option if you want to download the transferred files as a compressed archive.
 
-4. **Select files for transfer and click the "Send File" button.**
-
-5. **Monitor file transfer progress in the progress container.**
-
-## Stack Flow
-
-1. **Frontend:**
-   - HTML/CSS for the user interface.
-   - JavaScript for handling PeerJS, file transfer logic, and DOM manipulation.
-   - PeerJS for establishing peer connections.
-
-2. **Backend:**
-   - No server-side logic is required as PeerJS handles the peer-to-peer communication.
-
-3. **PeerJS:**
-   - PeerJS library is used for simplifying WebRTC peer-to-peer connections.
+---
 
 ## Contributing
 
-Contributions are welcome! If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request.
+Feel free to fork this repository, make changes, and submit a pull request. For feature requests or bug reports, please open an issue.
