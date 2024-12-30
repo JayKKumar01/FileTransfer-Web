@@ -1,61 +1,79 @@
-//file-input-util.js
 // Importing necessary constants
 import { FILE_INPUT, FILE_LIST_CONTAINER, FILE_LIST } from './constants.js';
 
-// Wait for the DOM content to be fully loaded before executing the script
+// Wait for the DOM content to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Event listeners for file input and file list
     FILE_INPUT.addEventListener('change', handleFileSelection);
     FILE_LIST.addEventListener('click', handleFileListClick);
 });
 
-// Event handler for file selection changes
+/**
+ * Handles changes in the file input and updates the file list.
+ */
 async function handleFileSelection() {
-    const selectedFiles = FILE_INPUT.files;
+    const selectedFiles = Array.from(FILE_INPUT.files);
 
-    // Clear the file list content
+    // Clear previous file list
     FILE_LIST.innerHTML = '';
 
     if (selectedFiles.length > 1) {
-        // Display selected files in the file list container
         FILE_LIST_CONTAINER.style.display = 'block';
-        for (let i = 0; i < selectedFiles.length; i++) {
-            const fileName = selectedFiles[i].name;
-            const listItem = document.createElement('li');
-            listItem.textContent = fileName;
-            FILE_LIST.appendChild(listItem);
-        }
+
+        // Use a DocumentFragment for better DOM manipulation performance
+        const fragment = document.createDocumentFragment();
+
+        selectedFiles.forEach(file => {
+            const listItem = createFileListItem(file.name);
+            fragment.appendChild(listItem);
+        });
+
+        FILE_LIST.appendChild(fragment);
     } else {
-        // Hide file list container if no or a single file is selected
         FILE_LIST_CONTAINER.style.display = 'none';
         FILE_LIST.innerHTML = '<li>No files selected</li>';
     }
 }
 
-// Event handler for file list item click events
+/**
+ * Creates an individual file list item.
+ * @param {string} fileName - The name of the file.
+ * @returns {HTMLElement} - The list item element.
+ */
+function createFileListItem(fileName) {
+    const listItem = document.createElement('li');
+    listItem.textContent = fileName;
+    return listItem;
+}
+
+/**
+ * Handles clicks on file list items to remove a file from the list.
+ */
 function handleFileListClick(event) {
     const item = event.target;
-    const fileListItems = document.querySelectorAll('#fileList li');
 
-    fileListItems.forEach((listItem) => {
-        if (item == listItem) {
-            // Remove the clicked file from the list and update the file input
-            item.remove();
-            const fileName = item.textContent.trim();
-            const dataTransfer = new DataTransfer();
+    if (item.tagName === 'LI') {
+        removeFileFromInput(item.textContent.trim());
+        item.remove();
 
-            Array.from(FILE_INPUT.files).forEach((file) => {
-                if (file.name !== fileName) {
-                    dataTransfer.items.add(file);
-                }
-            });
+        const remainingItems = FILE_LIST.querySelectorAll('li');
+        if (remainingItems.length < 2) {
+            FILE_LIST_CONTAINER.style.display = 'none';
+        }
+    }
+}
 
-            FILE_INPUT.files = dataTransfer.files;
+/**
+ * Removes the specified file from the file input.
+ * @param {string} fileName - The name of the file to remove.
+ */
+function removeFileFromInput(fileName) {
+    const dataTransfer = new DataTransfer();
+
+    Array.from(FILE_INPUT.files).forEach(file => {
+        if (file.name !== fileName) {
+            dataTransfer.items.add(file);
         }
     });
 
-    if (fileListItems.length < 2) {
-        // Hide the file list container if less than 2 files are present
-        FILE_LIST_CONTAINER.style.display = 'none';
-    }
+    FILE_INPUT.files = dataTransfer.files;
 }
