@@ -14,7 +14,6 @@ export const PROGRESS_BAR = document.getElementById('progress-bar');
 export const PROGRESS_TEXT = document.getElementById('progress-text');
 export const ZIP_TOGGLE = document.getElementById('zipToggle');
 export const SEND_BUTTON = document.getElementById('sendButton');
-export const SAVE_BUTTON = document.getElementById('saveButton');
 
 // SECTION 2: Constants
 export const PREFIX = "JayKKumar01-File-Transfer-";
