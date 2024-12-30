@@ -1,6 +1,4 @@
-//utils.js
-// SECTION 3: Utility Functions
-
+// File: utils.js
 import {
     LOGS_TEXTAREA,
     PROGRESS_BAR,

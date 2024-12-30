@@ -1,3 +1,4 @@
+// File: sender-util.js
 import {
     FILE_INPUT,
     FILE_LIST_CONTAINER,

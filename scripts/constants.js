@@ -1,4 +1,4 @@
-//constants.js
+// File: constants.js
 // SECTION 1: DOM Elements
 export const LOGS_TEXTAREA = document.getElementById('logs');
 export const TRANSFER_CONTAINER = document.getElementById('transfer-container');

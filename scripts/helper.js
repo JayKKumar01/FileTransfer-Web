@@ -1,5 +1,4 @@
-//helper.js
-// SECTION 1: Screen Wake Lock Functionality
+// File: helper.js
 async function keepScreenAwake() {
     try {
         if ('wakeLock' in navigator) {

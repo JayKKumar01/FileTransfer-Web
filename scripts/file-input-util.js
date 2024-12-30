@@ -1,4 +1,4 @@
-// Importing necessary constants
+// File: file-input-util.js
 import { FILE_INPUT, FILE_LIST_CONTAINER, FILE_LIST } from './constants.js';
 
 // Wait for the DOM content to be fully loaded

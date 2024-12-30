@@ -1,3 +1,4 @@
+// File: receiver-util.js
 import { getConnection } from './peer-util.js';
 import {
     appendLog,

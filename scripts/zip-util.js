@@ -1,5 +1,4 @@
-//zip-util.js
-// Importing necessary constants and utilities
+// File: zip-util.js
 import { PREFIX, ZIP_TOGGLE } from './constants.js';
 import { appendLog } from './utils.js';
 

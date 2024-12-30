@@ -1,5 +1,4 @@
-//peer-util.js
-// SECTION 4: Peer Connection Management
+// File: peer-util.js
 import {
     PREFIX,
     RANDOM_ID,
