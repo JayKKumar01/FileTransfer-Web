@@ -18,7 +18,11 @@ import { ready, handleFileData } from './receiver-util.js'
 // Generate peer connection ID using prefix and random ID
 const peerBranch = `${PREFIX}${getTodayDate()}-`;
 const peerId = `${peerBranch}${RANDOM_ID}`;
-const peer = new Peer(peerId);
+// const peer = new Peer(peerId);
+const peer = new Peer(peerId, {
+    port: 443,
+    path: '/',
+});
 let conn;
 
 // Handle peer-related events like connection and disconnection
